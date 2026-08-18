@@ -1,0 +1,16 @@
+{
+  "BiLSTM": {
+    "Accuracy": 0.9570831750854538,
+    "Precision": 0.94,
+    "Recall": 0.9448040885860307,
+    "F1": 0.9423959218351742,
+    "ROC-AUC": 0.9899165645115016,
+    "Confusion Matrix": {
+      "TN": 4787,
+      "FP": 177,
+      "FN": 162,
+      "TP": 2773
+    },
+    "Saved File": "/Users/sam/.gemini/antigravity-ide/scratch/scamshield/models/bilstm_model.pt"
+  }
+}

@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScamShield — NLP Threat Intelligence Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%230B1220'/%3E%3Cpath d='M50 15 L80 28 V50 C80 70 68 84 50 90 C32 84 20 70 20 50 V28 Z' fill='none' stroke='%233FD0C9' stroke-width='5'/%3E%3Ccircle cx='50' cy='48' r='6' fill='%233FD0C9'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0B1220;
+    --panel:     #121B2E;
+    --panel-2:   #17223A;
+    --line:      #223250;
+    --text:      #E7ECF3;
+    --muted:     #8B96A8;
+    --accent:    #3FD0C9;
+    --danger:    #E5484D;
+    --safe:      #2FBF71;
+    --warn:      #F5A623;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+  body { display: flex; flex-direction: column; align-items: center; padding: 40px 20px 80px; }
+
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; width: 100%; max-width: 920px; }
+
+  header { margin-bottom: 24px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; color: var(--accent);
+    text-transform: uppercase; display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  h1 { font-family: var(--mono); font-weight: 700; font-size: 28px; letter-spacing: -0.01em; margin: 0 0 8px; }
+  header p { color: var(--muted); font-size: 14.5px; margin: 0; max-width: 62ch; line-height: 1.5; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin: 24px 0 20px; border-bottom: 1px solid var(--line); }
+  .tab-btn {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em; color: var(--muted);
+    background: transparent; border: none; padding: 10px 16px; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px; margin-bottom: 20px; }
+  .panel h2 { font-family: var(--mono); font-size: 15px; margin: 0 0 4px; }
+  .panel .sub { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+
+  label.field-label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+  textarea {
+    width: 100%; min-height: 108px; resize: vertical;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px;
+    color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.5;
+    padding: 14px; outline: none; transition: border-color 0.15s ease;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: #5C6880; }
+
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    font-family: var(--mono); font-size: 12px; color: var(--muted);
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 20px;
+    padding: 6px 12px; cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease;
+    appearance: none; -webkit-appearance: none;
+  }
+  .chip:hover, .chip:focus-visible { border-color: var(--accent); color: var(--accent); }
+  .char-count { font-family: var(--mono); font-size: 10.5px; color: var(--muted); text-align: right; margin-top: 6px; }
+  .char-count.warn { color: var(--warn); }
+
+  .row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 16px; flex-wrap: wrap; }
+
+  .segmented { display: inline-flex; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 3px; gap: 2px; }
+  .segmented button {
+    font-family: var(--mono); font-size: 12.5px; color: var(--muted); background: transparent;
+    border: none; border-radius: 6px; padding: 7px 13px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
+  }
+  .segmented button.active { background: var(--accent); color: #06231F; font-weight: 600; }
+
+  .toggle-link {
+    font-family: var(--mono); font-size: 11.5px; color: var(--muted); cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px;
+    background: transparent; border: none; padding: 0; appearance: none; -webkit-appearance: none;
+  }
+  .toggle-link:hover, .toggle-link:focus-visible { color: var(--accent); }
+
+  .btn {
+    font-family: var(--mono); font-size: 13.5px; font-weight: 600; letter-spacing: 0.04em;
+    color: #06231F; background: var(--accent); border: none; border-radius: 8px;
+    padding: 12px 22px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+
+  .result-panel { position: relative; overflow: hidden; display: none; }
+  .result-panel.show { display: block; }
+  .scan-sweep {
+    position: absolute; top: 0; left: -40%; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(63,208,201,0.18), transparent);
+    animation: sweep 0.9s ease-in-out; pointer-events: none;
+  }
+  @keyframes sweep { from { left: -40%; } to { left: 100%; } }
+
+  .verdict-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+  .verdict-badge { font-family: var(--mono); font-weight: 700; font-size: 20px; letter-spacing: 0.02em; display: flex; align-items: center; gap: 10px; }
+  .verdict-badge .icon { width: 12px; height: 12px; border-radius: 50%; }
+  .verdict-badge.scam .icon { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+  .verdict-badge.safe .icon { background: var(--safe); box-shadow: 0 0 10px var(--safe); }
+  .verdict-badge.scam { color: var(--danger); }
+  .verdict-badge.safe { color: var(--safe); }
+
+  .risk-tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--line); color: var(--muted); }
+
+  .meter-label { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .meter { display: flex; gap: 3px; height: 20px; margin-bottom: 8px; }
+  .meter-seg { flex: 1; background: var(--panel-2); border-radius: 2px; transition: background 0.25s ease; }
+  .meter-seg.on.scam { background: var(--danger); }
+  .meter-seg.on.safe { background: var(--safe); }
+
+  .threshold-row { margin: 18px 0 4px; }
+  .threshold-row input[type=range] { width: 100%; accent-color: var(--accent); }
+  .threshold-row .vals { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding-top: 16px; margin-top: 4px; border-top: 1px solid var(--line); }
+  .stat { font-family: var(--mono); }
+  .stat .k { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .stat .v { font-size: 14px; color: var(--text); font-weight: 600; }
+
+  .empty-state { color: var(--muted); font-size: 13.5px; text-align: center; padding: 8px 0 4px; }
+  .error-box {
+    display: none; font-family: var(--mono); font-size: 13px; color: var(--danger);
+    background: rgba(229,72,77,0.08); border: 1px solid rgba(229,72,77,0.3);
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 20px;
+  }
+  .error-box.show { display: block; }
+
+  /* Explainability */
+  .explain-box { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .explain-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .explain-highlight {
+    font-size: 14.5px; line-height: 1.8; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
+  }
+  .hl-scam { background: rgba(229,72,77,0.28); border-radius: 3px; padding: 1px 3px; }
+  .hl-safe { background: rgba(47,191,113,0.28); border-radius: 3px; padding: 1px 3px; }
+  .token-lists { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .token-col-title { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+  .token-col-title.scam { color: var(--danger); }
+  .token-col-title.safe { color: var(--safe); }
+  .token-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-family: var(--mono); font-size: 12px; }
+  .token-bar-row .word { width: 90px; flex-shrink: 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .token-bar-track { flex: 1; height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
+  .token-bar-fill { height: 100%; border-radius: 4px; }
+  .token-bar-fill.scam { background: var(--danger); }
+  .token-bar-fill.safe { background: var(--safe); }
+  .explain-note { font-size: 12px; color: var(--muted); margin-top: 14px; line-height: 1.5; }
+  .explain-unavailable { font-size: 13px; color: var(--muted); background: var(--panel-2); border: 1px dashed var(--line); border-radius: 8px; padding: 14px 16px; }
+
+  /* Session history */
+  .history-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+  .history-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  .history-table td { font-size: 13px; padding: 9px 6px; border-bottom: 1px solid var(--line); }
+  .history-table td.msg { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+  .badge-sm { font-family: var(--mono); font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
+  .badge-sm.scam { color: var(--danger); background: rgba(229,72,77,0.12); }
+  .badge-sm.safe { color: var(--safe); background: rgba(47,191,113,0.12); }
+
+  /* Model comparison tab */
+  .metric-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .metric-tabs button {
+    font-family: var(--mono); font-size: 11.5px; color: var(--muted); background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: 6px 11px; cursor: pointer;
+  }
+  .metric-tabs button.active { background: var(--accent); color: #06231F; border-color: var(--accent); font-weight: 600; }
+
+  .bar-chart-row { display: grid; grid-template-columns: 150px 1fr 60px; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .bar-chart-row .name { font-family: var(--mono); font-size: 12.5px; }
+  .bar-track { height: 22px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), #2AAFA9); transition: width 0.5s ease; }
+  .bar-chart-row .val { font-family: var(--mono); font-size: 12px; text-align: right; color: var(--muted); }
+
+  table.cmp-table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 12.5px; }
+  table.cmp-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); cursor: pointer; user-select: none; }
+  table.cmp-table th:hover { color: var(--accent); }
+  table.cmp-table th.sorted { color: var(--accent); }
+  table.cmp-table td { padding: 10px 8px; border-bottom: 1px solid var(--line); font-family: var(--mono); }
+  table.cmp-table tr:hover td { background: var(--panel-2); }
+  table.cmp-table td.name-cell { font-family: var(--sans); font-weight: 500; }
+  .best-val { color: var(--accent); font-weight: 700; }
+
+  .cm-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; max-width: 260px; margin-top: 10px; }
+  .cm-cell { padding: 12px; border-radius: 6px; font-family: var(--mono); text-align: center; }
+  .cm-cell .n { font-size: 18px; font-weight: 700; }
+  .cm-cell .l { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+  .cm-tp, .cm-tn { background: rgba(47,191,113,0.12); }
+  .cm-fp, .cm-fn { background: rgba(229,72,77,0.12); }
+
+  .model-detail { display: none; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .model-detail.show { display: block; }
+
+  /* EDA tab */
+  .figure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .figure-card img { width: 100%; border-radius: 8px; border: 1px solid var(--line); display: block; }
+  .figure-card .cap { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 8px; text-align: center; }
+  .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+  .stat-card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+  .stat-card .n { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-card .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  footer { margin-top: 8px; text-align: center; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; }
+
+  @media (max-width: 640px) {
+    .stat-grid, .figure-grid, .stat-cards, .token-lists { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow"><span class="dot"></span>NLP TEXT CLASSIFIER — LIVE INFERENCE + EXPLAINABLE AI</div>
+      <h1>ScamShield Threat Intelligence Dashboard</h1>
+      <p>Scam/phishing text classification comparing 5 trained models (classical ML + deep learning), with exact feature-level explainability for the linear SVM.</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="scanner">▸ Scanner</button>
+      <button class="tab-btn" data-tab="compare">▸ Model Comparison</button>
+      <button class="tab-btn" data-tab="eda">▸ Dataset &amp; EDA</button>
+    </div>
+
+    <!-- ============ SCANNER TAB ============ -->
+    <div class="tab-panel active" id="tab-scanner">
+
+      <div class="panel" id="singleScanPanel">
+        <div class="row" style="margin-top:0;">
+          <label class="field-label" style="margin-bottom:0;">Message to analyze</label>
+          <button class="toggle-link" id="batchToggle">switch to batch mode</button>
+        </div>
+
+        <textarea id="textInput" placeholder="e.g. Congratulations! You've won a prize, click here to claim now..."></textarea>
+        <div class="row" style="margin-top:8px;">
+          <div class="chips">
+            <button class="chip" data-fill="Congratulations! You have WON $5000. Click here now to claim your prize before it expires: bit.ly/claim99">try a scam example</button>
+            <button class="chip" data-fill="Hey, are we still on for lunch tomorrow at 12?">try a safe example</button>
+            <button class="chip" data-fill="URGENT: Your bank account will be suspended. Verify your OTP immediately: hxxp://fake-bank.co">try a phishing example</button>
+          </div>
+          <button class="toggle-link" id="clearTextBtn" style="color:var(--muted);">clear</button>
+        </div>
+        <div class="char-count" id="charCount"></div>
+
+        <div class="row">
+          <div>
+            <label class="field-label" style="margin-bottom:8px;">Model</label>
+            <div class="segmented" id="modelSelect">
+              <button data-model="svm" class="active">SVM</button>
+              <button data-model="bilstm">BiLSTM</button>
+              <button data-model="distilbert">DistilBERT</button>
+            </div>
+          </div>
+          <button class="btn" id="scanBtn">▸ SCAN MESSAGE</button>
+          <button class="btn ghost" id="compareBtn">▸ COMPARE ALL 3</button>
+        </div>
+      </div>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <!-- multi-model comparison (shows model disagreement at a glance) -->
+      <div class="panel" id="compareAllPanel" style="display:none;">
+        <h2>Model Agreement Check</h2>
+        <p class="sub">Same message, all 3 models — useful for spotting cases where models disagree.</p>
+        <div id="compareAllContent"></div>
+      </div>
+
+      <!-- single-scan result -->
+      <div class="panel result-panel" id="resultPanel">
+        <div class="scan-sweep" id="sweep"></div>
+        <div class="verdict-row">
+          <div class="verdict-badge" id="verdictBadge"><span class="icon"></span><span id="verdictText">—</span></div>
+          <div class="risk-tag" id="riskTag">—</div>
+        </div>
+
+        <div class="meter-label"><span>SCAM PROBABILITY</span><span id="probText">0%</span></div>
+        <div class="meter" id="meter"></div>
+
+        <div class="threshold-row">
+          <label class="field-label" style="margin-bottom:6px;">Decision threshold: <span id="thresholdVal">0.50</span></label>
+          <input type="range" id="thresholdSlider" min="0" max="1" step="0.01" value="0.5">
+          <div class="vals"><span>0.0 — flag everything</span><span>1.0 — flag nothing</span></div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat"><div class="k">Model Used</div><div class="v" id="statModel">—</div></div>
+          <div class="stat"><div class="k">Classification</div><div class="v" id="statClass">—</div></div>
+          <div class="stat"><div class="k">Inference Time</div><div class="v" id="statTime">—</div></div>
+        </div>
+
+        <!-- explainable AI -->
+        <div class="explain-box" id="explainBox">
+          <div class="explain-title">
+            <span>🔍 EXPLAINABLE AI — why the model decided this</span>
+            <span id="explainMethodBadge"></span>
+          </div>
+          <div id="explainContent"></div>
+        </div>
+      </div>
+
+      <!-- batch mode -->
+      <div class="panel" id="batchPanel" style="display:none;">
+        <label class="field-label">Batch input — one message per line</label>
+        <textarea id="batchInput" style="min-height:140px;" placeholder="Message one...&#10;Message two...&#10;Message three..."></textarea>
+        <div class="row">
+          <button class="toggle-link" id="batchToggleBack">switch to single scan</button>
+          <button class="btn" id="batchScanBtn">▸ SCAN ALL</button>
+        </div>
+        <div id="batchResults" style="margin-top:18px;"></div>
+      </div>
+
+      <!-- session history -->
+      <div class="panel" id="historyPanel" style="display:none;">
+        <div class="row" style="margin-top:0;">
+          <div>
+            <h2 style="margin-bottom:2px;">Session History</h2>
+            <p class="sub" style="margin-bottom:0;">Every scan you've run this session, most recent first.</p>
+          </div>
+          <div style="display:flex; gap:14px; align-items:center;">
+            <button class="toggle-link" id="exportHistoryBtn" style="color:var(--muted);">export CSV</button>
+            <button class="toggle-link" id="clearHistoryBtn" style="color:var(--muted);">clear</button>
+          </div>
+        </div>
+        <table class="history-table" style="margin-top:14px;">
+          <thead><tr><th>Message</th><th>Model</th><th>Verdict</th><th>Prob.</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel" id="emptyPanel">
+        <div class="empty-state">Run a scan to see results here.</div>
+      </div>
+    </div>
+
+    <!-- ============ MODEL COMPARISON TAB ============ -->
+    <div class="tab-panel" id="tab-compare">
+      <div class="panel">
+        <h2>Metric Comparison — 5 Models</h2>
+        <p class="sub">Evaluated on a held-out test set of 7,899 messages. Click a metric to change the chart; click a model row for its confusion matrix.</p>
+        <div class="metric-tabs" id="metricTabs"></div>
+        <div id="barChart"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Full Comparison Table</h2>
+        <p class="sub">Best value per column highlighted.</p>
+        <div style="overflow-x:auto;">
+          <table class="cmp-table" id="cmpTable"></table>
+        </div>
+        <div class="model-detail" id="modelDetail"></div>
+      </div>
+    </div>
+
+    <!-- ============ EDA TAB ============ -->
+    <div class="tab-panel" id="tab-eda">
+      <div class="panel">
+        <h2>Dataset Overview</h2>
+        <p class="sub">Unified from 4 public sources — MeAJOR Phishing Email Dataset, Enron Email Dataset, Enron-Spam, and SMS Spam Collection.</p>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="n">7,899</div><div class="l">Test Set Size</div></div>
+          <div class="stat-card"><div class="n">5</div><div class="l">Models Trained</div></div>
+          <div class="stat-card"><div class="n">4</div><div class="l">Data Sources</div></div>
+          <div class="stat-card"><div class="n">0.9944</div><div class="l">Best ROC-AUC (SVM)</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Exploratory Data Analysis</h2>
+        <p class="sub">Class balance, message length distribution, and source composition of the training corpus.</p>
+        <div class="figure-grid">
+          <div class="figure-card"><img src="assets/class_distribution.png" alt="Class distribution"><div class="cap">Class distribution (scam vs legitimate)</div></div>
+          <div class="figure-card"><img src="assets/text_length_distribution.png" alt="Text length distribution"><div class="cap">Message length distribution</div></div>
+          <div class="figure-card"><img src="assets/samples_by_type.png" alt="Samples by type"><div class="cap">Samples by message type</div></div>
+          <div class="figure-card"><img src="assets/samples_by_source.png" alt="Samples by source"><div class="cap">Samples by dataset source</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Model Comparison Chart</h2>
+        <p class="sub">Generated during Phase 6 evaluation (src/models/compare_models.py).</p>
+        <div class="figure-card"><img src="assets/model_comparison.png" alt="Model comparison chart"></div>
+      </div>
+    </div>
+
+    <footer>ACADEMIC DEMO — NLP COURSE PROJECT — RUNS ON LOCAL FASTAPI BACKEND</footer>
+  </div>
+
+<script>
+  const API_BASE = "http://127.0.0.1:8000";
+  const SEGMENTS = 24;
+  let history = [];
+  let lastResult = null;   // { probability, backend, ... } for the threshold slider
+  let modelsInfoCache = null;
+  let activeMetric = 'f1';
+  let cmpSortKey = 'f1';
+  let cmpSortDir = 'desc';
+  const loadedBackends = new Set(); // tracks which models have been lazy-loaded server-side once
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+      if (btn.dataset.tab === 'compare') loadModelComparison();
+    });
+  });
+
+  // ---------- Scanner: setup ----------
+  const textInput   = document.getElementById('textInput');
+  const scanBtn     = document.getElementById('scanBtn');
+  const modelSelect = document.getElementById('modelSelect');
+  const resultPanel = document.getElementById('resultPanel');
+  const emptyPanel  = document.getElementById('emptyPanel');
+  const errorBox    = document.getElementById('errorBox');
+  const meter       = document.getElementById('meter');
+  const sweep       = document.getElementById('sweep');
+  const explainBox  = document.getElementById('explainBox');
+  const thresholdSlider = document.getElementById('thresholdSlider');
+
+  let selectedModel = 'svm';
+
+  for (let i = 0; i < SEGMENTS; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'meter-seg';
+    meter.appendChild(seg);
+  }
+
+  modelSelect.addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') return;
+    [...modelSelect.children].forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedModel = e.target.dataset.model;
+    updateCharCount();
+  });
+
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      textInput.value = chip.dataset.fill;
+      textInput.focus();
+      updateCharCount();
+    });
+  });
+
+  document.getElementById('clearTextBtn').addEventListener('click', () => {
+    textInput.value = '';
+    textInput.focus();
+    updateCharCount();
+  });
+
+  // Model truncation limits, matching the backend tokenizers exactly
+  // (src/models/predictor.py: SimpleTokenizer max_length=200 words for
+  // BiLSTM; DistilBertTokenizer truncation=True, max_length=128 tokens).
+  // Warn before scanning rather than silently returning a result based
+  // on cut-off text.
+  const TRUNCATION_LIMITS = { svm: null, bilstm: 200, distilbert: 128 };
+  function updateCharCount() {
+    const wordCount = textInput.value.trim().split(/\s+/).filter(Boolean).length;
+    const limit = TRUNCATION_LIMITS[selectedModel];
+    const el = document.getElementById('charCount');
+    if (!wordCount) { el.textContent = ''; el.classList.remove('warn'); return; }
+    if (limit && wordCount > limit) {
+      el.textContent = `${wordCount} words — ${selectedModel.toUpperCase()} only reads the first ~${limit}, the rest will be ignored`;
+      el.classList.add('warn');
+    } else {
+      el.textContent = `${wordCount} word${wordCount === 1 ? '' : 's'}`;
+      el.classList.remove('warn');
+    }
+  }
+  textInput.addEventListener('input', updateCharCount);
+
+  scanBtn.addEventListener('click', runScan);
+  document.getElementById('compareBtn').addEventListener('click', runCompareAll);
+  textInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) runScan(); });
+
+  async function runCompareAll() {
+    const text = textInput.value.trim();
+    errorBox.classList.remove('show');
+    if (!text) { errorBox.textContent = 'Type or paste a message first.'; errorBox.classList.add('show'); return; }
+
+    const compareBtn = document.getElementById('compareBtn');
+    const panel = document.getElementById('compareAllPanel');
+    const content = document.getElementById('compareAllContent');
+    compareBtn.disabled = true;
+    compareBtn.textContent = '▸ COMPARING…';
+    panel.style.display = 'block';
+    content.innerHTML = '<div class="empty-state">Running all 3 models…</div>';
+
+    try {
+      const models = ['svm', 'bilstm', 'distilbert'];
+      const results = await Promise.all(models.map(m =>
+        fetch(`${API_BASE}/predict`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, backend: m })
+        }).then(r => { if (!r.ok) throw new Error(`${m}: server returned ${r.status}`); return r.json(); })
+      ));
+
+      const verdicts = results.map(r => r.is_scam);
+      const allAgree = verdicts.every(v => v === verdicts[0]);
+
+      const rows = results.map((r, i) => `
+        <div class="bar-chart-row">
+          <div class="name">${models[i].toUpperCase()}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(r.probability*100)}%; background:${r.is_scam ? 'linear-gradient(90deg, var(--danger), #B93338)' : 'linear-gradient(90deg, var(--safe), #1F8F55)'};"></div></div>
+          <div class="val">${Math.round(r.probability*100)}%</div>
+        </div>`).join('');
+
+      content.innerHTML = `
+        <div class="risk-tag" style="border-color:${allAgree ? 'var(--safe)' : 'var(--warn)'}; color:${allAgree ? 'var(--safe)' : 'var(--warn)'}; margin-bottom:14px; display:inline-block;">
+          ${allAgree ? '✓ ALL 3 MODELS AGREE' : '⚠ MODELS DISAGREE — borderline case'}
+        </div>
+        ${rows}
+        ${!allAgree ? '<div class="explain-note" style="margin-top:14px;">Disagreement usually means the message sits near a decision boundary — often genuinely ambiguous text (e.g. a legitimate-sounding reminder that also matches common phishing phrasing). Worth discussing which model\'s reasoning you trust more via the Scanner\'s explainability panel.</div>' : ''}
+      `;
+      addToHistory(text, 'compare-all', verdicts.filter(Boolean).length >= 2, Math.max(...results.map(r=>r.probability)));
+      renderHistory();
+    } catch (err) {
+      content.innerHTML = `<div class="error-box show">Couldn't reach the backend — is 'uvicorn app:app --reload' running? (${err.message})</div>`;
+    } finally {
+      compareBtn.disabled = false;
+      compareBtn.textContent = '▸ COMPARE ALL 3';
+    }
+  }
+
+  thresholdSlider.addEventListener('input', () => {
+    document.getElementById('thresholdVal').textContent = parseFloat(thresholdSlider.value).toFixed(2);
+    if (lastResult) applyThreshold();
+  });
+
+  function applyThreshold() {
+    const t = parseFloat(thresholdSlider.value);
+    const isScam = lastResult.probability >= t;
+    updateVerdictUI(isScam, lastResult.probability, lastResult.risk);
+  }
+
+  // ---------- Batch mode toggle ----------
+  const batchToggle = document.getElementById('batchToggle');
+  const batchToggleBack = document.getElementById('batchToggleBack');
+  const batchPanel = document.getElementById('batchPanel');
+
+  function showBatch(show) {
+    batchPanel.style.display = show ? 'block' : 'none';
+    document.getElementById('singleScanPanel').style.display = show ? 'none' : 'block';
+    resultPanel.classList.toggle('show', false);
+    errorBox.classList.remove('show');
+    emptyPanel.style.display = show ? 'none' : 'block';
+  }
+  batchToggle.addEventListener('click', () => showBatch(true));
+  batchToggleBack.addEventListener('click', () => showBatch(false));
+
+  document.getElementById('batchScanBtn').addEventListener('click', runBatchScan);
+
+  async function runBatchScan() {
+    const lines = document.getElementById('batchInput').value.split('\n').map(l => l.trim()).filter(Boolean);
+    const resultsDiv = document.getElementById('batchResults');
+    if (!lines.length) { resultsDiv.innerHTML = '<div class="empty-state">Add at least one message, one per line.</div>'; return; }
+
+    resultsDiv.innerHTML = '<div class="empty-state">Scanning…</div>';
+    try {
+      const res = await fetch(`${API_BASE}/predict/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texts: lines, backend: selectedModel })
+      });
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      const data = await res.json();
+
+      let rows = data.results.map((r, i) => {
+        const badgeClass = r.is_scam ? 'scam' : 'safe';
+        const label = r.is_scam ? 'SCAM' : 'SAFE';
+        addToHistory(lines[i], data.backend, r.is_scam, r.probability);
+        return `<tr>
+          <td class="msg" style="max-width:340px;">${escapeHtml(lines[i])}</td>
+          <td><span class="badge-sm ${badgeClass}">${label}</span></td>
+          <td>${Math.round(r.probability * 100)}%</td>
+        </tr>`;
+      }).join('');
+
+      resultsDiv.innerHTML = `<table class="history-table">
+        <thead><tr><th>Message</th><th>Verdict</th><th>Prob.</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+      renderHistory();
+    } catch (err) {
+      resultsDiv.innerHTML = `<div class="error-box show">Couldn't reach the backend — is 'uvicorn app:app --reload' running? (${err.message})</div>`;
+    }
+  }
+
+  // ---------- Single scan ----------
+  async function runScan() {
+    const text = textInput.value.trim();
+    errorBox.classList.remove('show');
+    if (!text) { errorBox.textContent = 'Type or paste a message first.'; errorBox.classList.add('show'); return; }
+
+    scanBtn.disabled = true;
+    scanBtn.textContent = '▸ SCANNING…';
+    // BiLSTM/DistilBERT are lazy-loaded server-side on first use, so the
+    // very first scan with either can visibly pause for a few seconds —
+    // without this, that pause looks like the app is frozen.
+    let firstLoadTimer = null;
+    if (!loadedBackends.has(selectedModel) && selectedModel !== 'svm') {
+      firstLoadTimer = setTimeout(() => {
+        scanBtn.textContent = '▸ LOADING MODEL (FIRST USE)…';
+      }, 800);
+    }
+    const startTime = performance.now();
+
+    try {
+      // /explain now works for all 3 backends — exact math for SVM,
+      // gradient x input saliency for the two neural models.
+      const res = await fetch(`${API_BASE}/explain`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, backend: selectedModel, top_k: 6 })
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody.detail || `Server returned ${res.status}`);
+      }
+
+      loadedBackends.add(selectedModel);
+      const data = await res.json();
+      const elapsedMs = (performance.now() - startTime).toFixed(1);
+      lastResult = { probability: data.probability, risk: data.risk, backend: selectedModel };
+      thresholdSlider.value = 0.5;
+      document.getElementById('thresholdVal').textContent = '0.50';
+      renderResult(data, elapsedMs, selectedModel);
+      addToHistory(text, selectedModel, data.is_scam, data.probability);
+      renderHistory();
+    } catch (err) {
+      errorBox.textContent = `Couldn't reach the backend — is 'uvicorn app:app --reload' running? (${err.message})`;
+      errorBox.classList.add('show');
+      resultPanel.classList.remove('show');
+      emptyPanel.style.display = 'block';
+    } finally {
+      if (firstLoadTimer) clearTimeout(firstLoadTimer);
+      scanBtn.disabled = false;
+      scanBtn.textContent = '▸ SCAN MESSAGE';
+    }
+  }
+
+  function updateVerdictUI(isScam, prob, risk) {
+    const pct = Math.round(prob * 100);
+    const tone = isScam ? 'scam' : 'safe';
+
+    const badge = document.getElementById('verdictBadge');
+    badge.className = `verdict-badge ${tone}`;
+    document.getElementById('verdictText').textContent = isScam ? 'SCAM / PHISHING DETECTED' : 'LOOKS LEGITIMATE';
+    document.getElementById('riskTag').textContent = `${risk.toUpperCase()} RISK`;
+    document.getElementById('probText').textContent = `${pct}%`;
+    document.getElementById('statClass').textContent = isScam ? 'Positive (1)' : 'Negative (0)';
+
+    const onCount = Math.round((pct / 100) * SEGMENTS);
+    [...meter.children].forEach((seg, i) => {
+      seg.classList.toggle('on', i < onCount);
+      seg.classList.toggle(tone, i < onCount);
+      if (i >= onCount) seg.classList.remove('scam', 'safe');
+    });
+  }
+
+  function renderResult(data, elapsedMs, backend) {
+    emptyPanel.style.display = 'none';
+    resultPanel.classList.add('show');
+
+    sweep.style.animation = 'none';
+    void sweep.offsetWidth;
+    sweep.style.animation = null;
+
+    updateVerdictUI(data.is_scam, data.probability, data.risk);
+    document.getElementById('statModel').textContent = backend.toUpperCase();
+    document.getElementById('statTime').textContent = `${elapsedMs} ms`;
+
+    renderExplainability(data, backend);
+  }
+
+  function renderExplainability(data, backend) {
+    const container = document.getElementById('explainContent');
+    if (!data.top_scam_tokens) {
+      container.innerHTML = `<div class="explain-unavailable">Explanation unavailable for this response.</div>`;
+      return;
+    }
+
+    const methodBadge = data.method === 'exact'
+      ? `<span class="risk-tag" style="border-color:var(--safe);color:var(--safe);">EXACT</span>`
+      : `<span class="risk-tag" style="border-color:var(--warn);color:var(--warn);">APPROXIMATE — GRADIENT × INPUT</span>`;
+    document.getElementById('explainMethodBadge').innerHTML = methodBadge;
+
+    // Highlight matched tokens directly in the original text.
+    // Uses \b-safe word tokenization instead of chained regex.replace,
+    // which previously could match token substrings inside unrelated
+    // words (e.g. "or" matching inside "before"/"provider") and could
+    // double-wrap overlapping tokens. Handles both single-word tokens
+    // and two-word phrases (the SVM's TF-IDF vocabulary includes bigrams
+    // like "click here", so single-word-only matching would silently
+    // drop those highlights).
+    const allTokens = [...data.top_scam_tokens.map(t => ({...t, cls:'hl-scam'})),
+                       ...data.top_safe_tokens.map(t => ({...t, cls:'hl-safe'}))];
+    const unigramMap = new Map();
+    const bigramMap = new Map();
+    allTokens.forEach(t => {
+      const parts = t.token.toLowerCase().split(/\s+/);
+      if (parts.length >= 2) bigramMap.set(parts.slice(0, 2).join(' '), t.cls);
+      else unigramMap.set(parts[0], t.cls);
+    });
+
+    // Tokenize into alternating word / non-word chunks, preserving originals
+    const chunks = data.text.match(/([A-Za-z0-9$]+(?:'[A-Za-z]+)?)|([^A-Za-z0-9$]+)/g) || [];
+    const wordIdx = chunks.map((c, i) => /^[A-Za-z0-9$]/.test(c) ? i : -1).filter(i => i >= 0);
+
+    const highlightCls = new Array(chunks.length).fill(null);
+    for (let wi = 0; wi < wordIdx.length; wi++) {
+      const i = wordIdx[wi];
+      const word = chunks[i].toLowerCase();
+      const nextWi = wordIdx[wi + 1];
+      if (nextWi !== undefined) {
+        const bigram = `${word} ${chunks[nextWi].toLowerCase()}`;
+        if (bigramMap.has(bigram)) {
+          const cls = bigramMap.get(bigram);
+          for (let k = i; k <= nextWi; k++) highlightCls[k] = cls; // covers the gap chunk too
+          wi++; // skip the second word, already consumed
+          continue;
+        }
+      }
+      if (unigramMap.has(word)) highlightCls[i] = unigramMap.get(word);
+    }
+
+    let highlighted = '';
+    let runCls = null, runText = '';
+    const flush = () => {
+      if (!runText) return;
+      highlighted += runCls ? `<span class="${runCls}">${escapeHtml(runText)}</span>` : escapeHtml(runText);
+      runText = '';
+    };
+    chunks.forEach((c, i) => {
+      if (highlightCls[i] !== runCls) { flush(); runCls = highlightCls[i]; }
+      runText += c;
+    });
+    flush();
+
+    const maxWeight = Math.max(...allTokens.map(t => Math.abs(t.weight)), 0.001);
+    const tokenBars = (tokens, cls) => tokens.map(t => `
+      <div class="token-bar-row">
+        <span class="word" title="${escapeHtml(t.token)}">${escapeHtml(t.token)}</span>
+        <div class="token-bar-track"><div class="token-bar-fill ${cls}" style="width:${Math.abs(t.weight)/maxWeight*100}%"></div></div>
+      </div>`).join('') || '<div class="empty-state" style="text-align:left;padding:4px 0;">none found</div>';
+
+    container.innerHTML = `
+      <div class="explain-highlight">${highlighted}</div>
+      <div class="token-lists">
+        <div>
+          <div class="token-col-title scam">→ pushes toward SCAM</div>
+          ${tokenBars(data.top_scam_tokens, 'scam')}
+        </div>
+        <div>
+          <div class="token-col-title safe">→ pushes toward SAFE</div>
+          ${tokenBars(data.top_safe_tokens, 'safe')}
+        </div>
+      </div>
+      <div class="explain-note">${escapeHtml(data.note)}</div>
+    `;
+  }
+
+  // ---------- Session history ----------
+  function addToHistory(text, backend, isScam, probability) {
+    history.unshift({ text, backend, isScam, probability, ts: new Date() });
+    if (history.length > 50) history.pop();
+  }
+  function renderHistory() {
+    const panel = document.getElementById('historyPanel');
+    const body = document.getElementById('historyBody');
+    if (!history.length) { panel.style.display = 'none'; return; }
+    panel.style.display = 'block';
+    body.innerHTML = history.map(h => `
+      <tr>
+        <td class="msg">${escapeHtml(h.text)}</td>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--muted);">${h.backend.toUpperCase()}</td>
+        <td><span class="badge-sm ${h.isScam ? 'scam' : 'safe'}">${h.isScam ? 'SCAM' : 'SAFE'}</span></td>
+        <td style="font-family:var(--mono);font-size:12px;">${Math.round(h.probability*100)}%</td>
+      </tr>`).join('');
+  }
+
+  document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+    history = [];
+    renderHistory();
+  });
+
+  document.getElementById('exportHistoryBtn').addEventListener('click', () => {
+    const rows = [['timestamp', 'message', 'model', 'verdict', 'probability'].join(',')];
+    history.forEach(h => {
+      const safeMsg = `"${h.text.replace(/"/g, '""')}"`;
+      rows.push([h.ts.toISOString(), safeMsg, h.backend, h.isScam ? 'SCAM' : 'SAFE', h.probability].join(','));
+    });
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `scamshield-session-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // ---------- Model comparison tab ----------
+  const METRICS = [
+    { key: 'accuracy', label: 'Accuracy' },
+    { key: 'precision', label: 'Precision' },
+    { key: 'recall', label: 'Recall' },
+    { key: 'f1', label: 'F1-Score' },
+    { key: 'roc_auc', label: 'ROC-AUC' },
+  ];
+
+  async function loadModelComparison() {
+    if (modelsInfoCache) { renderComparison(); return; }
+    try {
+      const res = await fetch(`${API_BASE}/models/info`);
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      modelsInfoCache = (await res.json()).models;
+      buildMetricTabs();
+      renderComparison();
+    } catch (err) {
+      document.getElementById('barChart').innerHTML = `<div class="error-box show">Couldn't reach the backend — is 'uvicorn app:app --reload' running? (${err.message})</div>`;
+    }
+  }
+
+  function buildMetricTabs() {
+    const el = document.getElementById('metricTabs');
+    el.innerHTML = METRICS.map(m => `<button data-metric="${m.key}" class="${m.key===activeMetric?'active':''}">${m.label}</button>`).join('');
+    el.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeMetric = btn.dataset.metric;
+        el.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderBarChart();
+      });
+    });
+  }
+
+  function renderComparison() {
+    renderBarChart();
+    renderCmpTable();
+  }
+
+  function renderBarChart() {
+    const el = document.getElementById('barChart');
+    const sorted = [...modelsInfoCache].sort((a,b) => b[activeMetric] - a[activeMetric]);
+    const max = Math.max(...sorted.map(m => m[activeMetric]));
+    el.innerHTML = sorted.map(m => `
+      <div class="bar-chart-row">
+        <div class="name">${m.name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(m[activeMetric]/max*100).toFixed(1)}%"></div></div>
+        <div class="val">${(m[activeMetric]*100).toFixed(2)}%</div>
+      </div>`).join('');
+  }
+
+  function renderCmpTable() {
+    const cols = [
+      {k:'name', l:'Model'}, {k:'accuracy', l:'Acc.'}, {k:'precision', l:'Prec.'},
+      {k:'recall', l:'Recall'}, {k:'f1', l:'F1'}, {k:'roc_auc', l:'ROC-AUC'},
+      {k:'latency_ms', l:'Latency'}, {k:'size_mb', l:'Size'}, {k:'false_negatives', l:'Missed Scams'}
+    ];
+    const bestOf = {};
+    ['accuracy','precision','recall','f1','roc_auc'].forEach(k => bestOf[k] = Math.max(...modelsInfoCache.map(m => m[k])));
+    bestOf['latency_ms'] = Math.min(...modelsInfoCache.map(m => m.latency_ms));
+    bestOf['size_mb'] = Math.min(...modelsInfoCache.map(m => m.size_mb));
+    bestOf['false_negatives'] = Math.min(...modelsInfoCache.map(m => m.false_negatives));
+
+    const fmt = (k, v) => {
+      if (k === 'name') return v;
+      if (k === 'latency_ms') return `${v} ms`;
+      if (k === 'size_mb') return `${v} MB`;
+      if (k === 'false_negatives') return v;
+      return `${(v*100).toFixed(2)}%`;
+    };
+
+    const sorted = [...modelsInfoCache].sort((a, b) => {
+      const dir = cmpSortDir === 'asc' ? 1 : -1;
+      if (cmpSortKey === 'name') return dir * a.name.localeCompare(b.name);
+      return dir * (a[cmpSortKey] - b[cmpSortKey]);
+    });
+
+    const thead = `<thead><tr>${cols.map(c =>
+      `<th data-key="${c.k}" class="${c.k === cmpSortKey ? 'sorted' : ''}">${c.l}${c.k === cmpSortKey ? (cmpSortDir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`
+    ).join('')}</tr></thead>`;
+    const tbody = `<tbody>${sorted.map(m => `
+      <tr data-model="${m.name}" style="cursor:pointer;" tabindex="0">
+        ${cols.map(c => {
+          const isBest = c.k !== 'name' && m[c.k] === bestOf[c.k];
+          return `<td class="${c.k==='name'?'name-cell':''} ${isBest?'best-val':''}">${fmt(c.k, m[c.k])}</td>`;
+        }).join('')}
+      </tr>`).join('')}</tbody>`;
+
+    const table = document.getElementById('cmpTable');
+    table.innerHTML = thead + tbody;
+    table.querySelectorAll('thead th').forEach(th => {
+      th.addEventListener('click', () => {
+        if (cmpSortKey === th.dataset.key) {
+          cmpSortDir = cmpSortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          cmpSortKey = th.dataset.key;
+          cmpSortDir = th.dataset.key === 'name' ? 'asc' : 'desc';
+        }
+        renderCmpTable();
+      });
+    });
+    table.querySelectorAll('tbody tr').forEach(tr => {
+      tr.addEventListener('click', () => showModelDetail(tr.dataset.model));
+      tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showModelDetail(tr.dataset.model); } });
+    });
+  }
+
+  function showModelDetail(name) {
+    const m = modelsInfoCache.find(x => x.name === name);
+    const detail = document.getElementById('modelDetail');
+    detail.classList.add('show');
+    const cm = m.confusion_matrix;
+    detail.innerHTML = `
+      <h2 style="margin-bottom:2px;">${m.name}</h2>
+      <p class="sub">${m.description}</p>
+      ${cm ? `
+        <label class="field-label">Confusion Matrix (test set)</label>
+        <div class="cm-grid">
+          <div class="cm-cell cm-tn"><div class="n">${cm.TN}</div><div class="l">True Negative</div></div>
+          <div class="cm-cell cm-fp"><div class="n">${cm.FP}</div><div class="l">False Positive</div></div>
+          <div class="cm-cell cm-fn"><div class="n">${cm.FN}</div><div class="l">False Negative</div></div>
+          <div class="cm-cell cm-tp"><div class="n">${cm.TP}</div><div class="l">True Positive</div></div>
+        </div>` : ''}
+    `;
+    detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ---------- utils ----------
+  function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+</script>
+</body>
+</html>

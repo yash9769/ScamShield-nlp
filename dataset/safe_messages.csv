@@ -1,0 +1,101 @@
+id,message,label,category
+1,"Your OTP for SBI internet banking login is 574831. Valid for 10 minutes. Do not share with anyone.",safe,banking
+2,"HDFC Bank: Your credit card ending 4521 was used for ₹1,250 at BigBazaar on 25-Jul-26 at 3:14PM. If not you call 1860.",safe,banking
+3,"Hey, are you coming for dinner tonight? Let me know by 6 PM.",safe,personal
+4,"Flipkart: Your order #9812345 for OnePlus Buds Z2 has been shipped. Expected delivery: 27-Jul. Track: flipkart.com/orders",safe,ecommerce
+5,"Amazon: Your order #113-2847591 is out for delivery today. You can track it at amazon.in/orders",safe,ecommerce
+6,"Google: A new sign-in on Chrome on Windows. If this was you, no action needed. If not, visit myaccount.google.com/security",safe,security
+7,"Reminder: Your appointment with Dr. Sharma is tomorrow at 11:00 AM at City Hospital, 3rd floor. Call 022-2345-6789 to reschedule.",safe,reminder
+8,"ICICI Bank: Statement for account ending 8934 for June 2026 is ready. View at icicibank.com or mobile app.",safe,banking
+9,"Ola: Your ride has arrived. OLA-XXXX4321 (White Swift) at Gate 2. Please board within 3 minutes.",safe,ecommerce
+10,"Swiggy: Your order from McDonald's is confirmed. Estimated delivery: 35 mins. Track live at swiggy.com/track",safe,ecommerce
+11,"Hi, this is Riya from HR. Your interview is scheduled for Monday 10 AM in Conference Room B. Please bring original documents.",safe,work
+12,"Paytm: ₹500 sent to mobile 9876543210 successfully. UPI Ref: 245678901234. Check history at paytm.com",safe,banking
+13,"Your Airtel postpaid bill of ₹799 for June 2026 is generated. Pay before 5th July to avoid late fee. Pay at airtel.in/pay",safe,utility
+14,"Zomato: Your order from Domino's Pizza is confirmed. Your pizza will arrive in 40 minutes. Order ID: #ZO782334",safe,ecommerce
+15,"PhonePe: ₹1,200 received from Ankit Sharma. UPI Ref: 567890123456. Balance updated. Check PhonePe app for details.",safe,banking
+16,"BSNL: Your number 98XXXXXXXX is active. Bill amount ₹299 due 10-Aug-26. Pay online at bsnl.co.in/payment",safe,utility
+17,"Meeting reminder: Project review with the team at 3 PM in the Zoom link sent earlier. Please be on time.",safe,work
+18,"LinkedIn: Rahul Desai has accepted your connection request. 500+ connections now. View profile at linkedin.com",safe,social
+19,"Your IRCTC e-ticket for train 12951 on 28-Jul (Mumbai to Delhi) has been booked. PNR: 4512678901. Check status at irctc.co.in",safe,ecommerce
+20,"Happy Birthday! Wishing you a wonderful day filled with joy and happiness. Hope all your dreams come true!",safe,personal
+21,"Jio: Your recharge of ₹199 for number 98XXXXXXXX is successful. Validity: 28 days, 2GB/day. Ref: JIO20260725",safe,utility
+22,"Your Amazon Prime membership renews on 15-Aug-2026 for ₹1,499. To manage subscriptions visit amazon.in/prime",safe,ecommerce
+23,"Bank of Baroda: Your account XXXXXX8934 shows credit of ₹25,000 on 25-Jul-26. Available balance: ₹62,450.",safe,banking
+24,"Hey! Movie tonight? 8 PM show at PVR Juhu. I'll book the tickets — just transfer your share ₹350 on GPay.",safe,personal
+25,"CRED: Your credit card bill of ₹8,432 is due on 3rd Aug. Pay now to earn CRED coins. Open app to pay.",safe,banking
+26,"Reminder: Renew your vehicle insurance before 30-Jul-2026. Visit policybazaar.com for best quotes. Your policy ends soon.",safe,reminder
+27,"SBI: Debit of ₹3,000 from account XXXXXX1234 via UPI on 25-Jul-26 at 2:30 PM. Available balance: ₹18,500.",safe,banking
+28,"Your Meesho order #MS987654 has been delivered. If you have any issues, contact support at meesho.com/support",safe,ecommerce
+29,"Google Pay: ₹2,000 sent to Priya Nair successfully on 25-Jul-26. UPI ID: priya.nair@okicici. View at gpay.app",safe,banking
+30,"Axis Bank: Your home loan EMI of ₹24,500 is due on 1-Aug. Auto-debit is enabled. Ensure sufficient balance.",safe,banking
+31,"Naukri.com: 5 new jobs matching your profile. View them at naukri.com/myjobs. Apply before seats fill up.",safe,work
+32,"Hi Mom, reached safely. The flight was on time. Will call you tonight. Love you!",safe,personal
+33,"Your IDFC First Bank savings account has been credited with ₹500 as welcome bonus. Login to app to check.",safe,banking
+34,"Reminder: PUC certificate for your vehicle MH-12-AB-1234 expires on 31-Jul-2026. Renew at any authorized center.",safe,reminder
+35,"Class 10 board exam results are out! Check your result at cbseresults.nic.in with roll number and date of birth.",safe,education
+36,"BookMyShow: Your booking for Kalki 2898-AD on 27-Jul-26, 6:30 PM at PVR Phoenix is confirmed. Booking ID: BMS934567",safe,ecommerce
+37,"Your SIP of ₹5,000 in XYZ Mutual Fund is processed for July 2026. NAV date: 25-Jul-26. Login to check portfolio.",safe,banking
+38,"Reminder: Your driving licence expires on 15-Sep-2026. Renew at your nearest RTO or at parivahan.gov.in",safe,reminder
+39,"MakeMyTrip: Flight booking confirmed. IndiGo 6E-789 on 1-Aug. PNR: ABCDEF. Check-in opens 48 hours before departure.",safe,ecommerce
+40,"Your electricity bill for meter no. 12345678 is ₹1,250 for June 2026. Pay at mahadiscom.in or nearest outlet.",safe,utility
+41,"Welcome! Your EPF UAN 100123456789 is activated. Track your PF balance at epfindia.gov.in or Umang app.",safe,banking
+42,"CIBIL score updated: Your score is 762 as of July 2026. Good standing. Check full report at cibil.com",safe,banking
+43,"Your Swiggy Genie order has been picked up. Estimated delivery to your location in 22 minutes. Track live.",safe,ecommerce
+44,"Dear Yash, your leave application for 28-Jul to 30-Jul has been approved by your manager. HR portal updated.",safe,work
+45,"Netflix: Your next billing date is 10-Aug-2026 for ₹499. Update payment method at netflix.com/youraccount",safe,ecommerce
+46,"Thanks for shopping with us! Your rating helps other customers. Rate your recent purchase on Amazon: amazon.in",safe,ecommerce
+47,"GSTIN 27XXXXXXXX1Z5 — Your GST return for June 2026 is due on 20-Jul. File at gst.gov.in to avoid penalty.",safe,utility
+48,"Your income tax return for FY 2025-26 has been successfully e-verified. IT Dept: ITR-2 acknowledged. Ref: ITR123456",safe,banking
+49,"Hello! Reminder from your dentist — you have an appointment on Thursday at 5 PM. Call 044-2345-6789 to cancel.",safe,reminder
+50,"Rapido: Your bike ride has ended. Total fare ₹89. Payment via UPI. Rate your ride on the Rapido app.",safe,ecommerce
+51,"Your PF withdrawal request for ₹35,000 is under process. Expected credit in 10 working days. Track at epfindia.gov.in",safe,banking
+52,"Good morning team! Standup call at 10 AM today. Please join via the usual Zoom link. Agenda in Slack.",safe,work
+53,"Your Pepperfry order for the sofa set has been dispatched. Delivery partner will call 30 min before arriving.",safe,ecommerce
+54,"Congratulations! You've been shortlisted for the interview at Infosys. Please log in to careers.infosys.com to schedule.",safe,work
+55,"India Post: Speed Post EE987654321IN has been delivered to addressee. Delivered on 25-Jul-2026 at 2:45 PM.",safe,ecommerce
+56,"HDFC Life: Your policy premium of ₹15,000 is due on 5-Aug-2026. Pay online at hdfclife.com to keep policy active.",safe,banking
+57,"Your Myntra return for order #MYN456789 has been picked up. Refund of ₹1,499 will be credited in 5-7 days.",safe,ecommerce
+58,"PhysicsWallah: Your fee payment for JEE batch 2026 of ₹12,000 is confirmed. Access your course at pw.live",safe,education
+59,"Happy Diwali! May the festival of lights bring happiness and prosperity to you and your family. 🪔",safe,personal
+60,"NEFT credit of ₹50,000 in your Kotak Bank account XXXXXXXX4567 on 25-Jul-2026 at 11:34 AM. From: RAJESH KUMAR",safe,banking
+61,"Your Two-Wheeler loan EMI of ₹3,200 has been debited successfully for July 2026. Loan outstanding: ₹48,000.",safe,banking
+62,"The meeting scheduled for 4 PM today is postponed to tomorrow 11 AM. Apologies for the inconvenience.",safe,work
+63,"Reminder: Voter ID enrollment deadline is 30-Jul. Register at voters.eci.gov.in or your local polling booth.",safe,reminder
+64,"Flipkart Big Billion Days starts 1-Aug! Save up to 80% on mobiles, electronics, and more. Browse at flipkart.com",safe,ecommerce
+65,"Your LIC policy premium of ₹8,500 is due on 28-Jul-2026. Pay online at licindia.in or any LIC branch.",safe,banking
+66,"Your school fee receipt for Quarter 2 is ready. Download at the school portal. Amount: ₹18,500 paid on 22-Jul.",safe,education
+67,"Just checking in — how are you doing? It's been a while since we last caught up. Let's grab coffee this week!",safe,personal
+68,"Canara Bank: FD of ₹1,00,000 matured on 25-Jul-2026. Principal + interest ₹1,07,200 credited to your account.",safe,banking
+69,"Reminder: Your Aadhaar mobile update is pending. Visit nearest Aadhaar Seva Kendra or book at appointments.uidai.gov.in",safe,reminder
+70,"Your UPSC application form has been submitted successfully. Application number: 0654321. Admit card from 15-Sep.",safe,education
+71,"IndusInd Bank: Salary credit of ₹68,500 in account XXXXXXXX9012 on 25-Jul-2026. From: TCS INDIA PVT LTD.",safe,banking
+72,"Your podcast episode from Spotify: 'The Science of Sleep' is downloaded and ready for offline listening.",safe,personal
+73,"Post office: MO (Money Order) of ₹3,000 from your relative in Kolkata will be delivered to your address today.",safe,banking
+74,"Hey, I saw you applied for the hostel room — it's been allocated! Check the portal at hostel.vit.ac.in",safe,education
+75,"Your Google Photos storage is at 14.2 GB of 15 GB free. Consider upgrading or managing photos to free space.",safe,reminder
+76,"NSE: Your demat account (IN-DP-XXXX) transaction statement for July is ready. Download at zerodha.com/console",safe,banking
+77,"Happy Anniversary! May your bond of love grow stronger with every passing year. Sending love and best wishes!",safe,personal
+78,"Tata Power: Your electricity bill of ₹2,100 for July 2026 is ready. Pay at tatapower.com by 10-Aug to avoid surcharge.",safe,utility
+79,"Your PAN card application (Acknowledgement: 123456789012) is under processing. Status update at tin.tin.nsdl.com",safe,banking
+80,"Summer internship at Wipro confirmed for June–August 2026. Joining formalities at hr.wipro.com. Stipend ₹10,000/month.",safe,work
+81,"Your Groww SIP of ₹3,000 in Axis Bluechip Fund is processed for July 2026. Portfolio up 12.3% YTD.",safe,banking
+82,"Hi Yash! The college fest team meeting is rescheduled to 5 PM tomorrow. Please update the venue booking too.",safe,personal
+83,"Your NEET result is out. Check your score at neet.nta.nic.in using your registration number and date of birth.",safe,education
+84,"Federal Bank: Your personal loan EMI of ₹7,800 for August 2026 will be auto-debited on 1-Aug. Ensure funds.",safe,banking
+85,"Train 12951 Mumbai Rajdhani is running 20 minutes late. Revised departure 4:50 PM from Mumbai Central.",safe,ecommerce
+86,"Your Paytm Fastag account has ₹50 balance. Recharge at paytm.com/fastag to avoid toll deductions failing.",safe,banking
+87,"Class cancelled for today. Prof. Mehta has conveyed that the Signals & Systems lecture will be compensated Friday.",safe,education
+88,"Your vehicle fitness certificate is due for renewal. Book appointment at parivahan.gov.in. No penalty if done on time.",safe,reminder
+89,"Reminder: Annual health check-up camp at RTO office tomorrow. Free BP and sugar testing 9 AM to 1 PM.",safe,reminder
+90,"Bajaj Finance: EMI of ₹5,499 for your refrigerator loan is due on 1-Aug-2026. Pay at bajajfinserv.in or app.",safe,banking
+91,"Your GATE 2027 application is submitted. Application number: GR27XXXXXXXXX. Admit card release: Nov 2026.",safe,education
+92,"Hi, I'm Ananya from marketing. Can you send me the Q2 report by EOD? The client presentation is tomorrow morning.",safe,work
+93,"MG Road Metro Station: Your Kochi Metro Monthly pass expires on 31-Jul. Renew at any metro station or app.",safe,utility
+94,"Zomato: Your subscription Zomato Gold expired on 24-Jul. Renew for ₹149/month to get unlimited free deliveries.",safe,ecommerce
+95,"Your gas cylinder booking from HP Gas is confirmed. Delivery in 2-3 working days. Booking ID: HP20260725",safe,utility
+96,"BPCL: Bharat Gas refill booked successfully for August 2026. Booking number: BG25071234. Delivery in 3-5 days.",safe,utility
+97,"Your vaccination certificate for COVID-19 booster dose is available on CoWIN at cowin.gov.in or Aarogya Setu.",safe,reminder
+98,"Thanks for the amazing session today! The team really appreciated your insights. Looking forward to next one.",safe,work
+99,"NSE/BSE: Sensex closed at 82,450 (+312). Nifty 50 at 25,120 (+98). Tech stocks led today's rally. Happy investing!",safe,banking
+100,"Your Blood Donation camp registration at Lilavati Hospital on 28-Jul is confirmed. Slot: 11 AM. Bring ID proof.",safe,reminder
