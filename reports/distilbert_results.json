@@ -1,0 +1,16 @@
+{
+  "DistilBERT": {
+    "Accuracy": 0.9606279275857703,
+    "Precision": 0.9301639344262295,
+    "Recall": 0.9666098807495741,
+    "F1": 0.9480367585630743,
+    "ROC-AUC": 0.9933362115236516,
+    "Confusion Matrix": {
+      "TN": 4751,
+      "FP": 213,
+      "FN": 98,
+      "TP": 2837
+    },
+    "Saved Directory": "/Users/sam/.gemini/antigravity-ide/scratch/scamshield/models/distilbert_scamshield"
+  }
+}

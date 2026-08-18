@@ -1,0 +1,44 @@
+{
+  "Logistic Regression": {
+    "Accuracy": 0.9598683377642739,
+    "Precision": 0.9625441696113074,
+    "Recall": 0.9281090289608177,
+    "F1": 0.9450130095403296,
+    "ROC-AUC": 0.9921300484441985,
+    "Confusion Matrix": {
+      "TN": 4858,
+      "FP": 106,
+      "FN": 211,
+      "TP": 2724
+    },
+    "Saved File": "/Users/sam/.gemini/antigravity-ide/scratch/scamshield/models/logistic_regression.joblib"
+  },
+  "Naive Bayes": {
+    "Accuracy": 0.9259399924041017,
+    "Precision": 0.9088378566457899,
+    "Recall": 0.8899488926746167,
+    "F1": 0.899294198657256,
+    "ROC-AUC": 0.9753697147571545,
+    "Confusion Matrix": {
+      "TN": 4702,
+      "FP": 262,
+      "FN": 323,
+      "TP": 2612
+    },
+    "Saved File": "/Users/sam/.gemini/antigravity-ide/scratch/scamshield/models/naive_bayes.joblib"
+  },
+  "SVM (Calibrated Linear)": {
+    "Accuracy": 0.9691100139258134,
+    "Precision": 0.9663778162911612,
+    "Recall": 0.9499148211243612,
+    "F1": 0.9580756013745705,
+    "ROC-AUC": 0.9944029722691625,
+    "Confusion Matrix": {
+      "TN": 4867,
+      "FP": 97,
+      "FN": 147,
+      "TP": 2788
+    },
+    "Saved File": "/Users/sam/.gemini/antigravity-ide/scratch/scamshield/models/svm.joblib"
+  }
+}

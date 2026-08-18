@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments & IDEs
+.env
+.venv
+env/
+venv/
+ENV/
+.vscode/
+.idea/
+.DS_Store
+
+# Large model binaries (>100MB exceeds GitHub limits)
+models/distilbert_scamshield/model.safetensors
+*.safetensors
+
+# Logs & temp files
+*.log

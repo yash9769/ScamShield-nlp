@@ -1,0 +1,101 @@
+id,message,label,category
+1,"URGENT: Your SBI account has been blocked. Verify your KYC immediately at bit.ly/sbi-kyc-verify to avoid suspension.",scam,smishing
+2,"Congratulations! You have won ₹25 Lakh in the KBC Lucky Draw. Call 9876543210 to claim your prize today.",scam,lottery
+3,"Your OTP for transaction is 482913. Do not share this OTP with anyone. OTP expires in 5 minutes.",scam,otp
+4,"Dear customer, your HDFC account is suspended. Update your PAN card at http://hdfcbank-kyc.xyz/update now.",scam,phishing
+5,"This is Amazon customer support. Your account shows suspicious activity. Share your OTP to secure your account.",scam,vishing
+6,"You've been selected for a work-from-home job. Earn ₹50,000/month. Pay ₹2,000 registration to start immediately.",scam,job
+7,"ALERT: Your Paytm wallet will be deactivated. Click here to complete KYC: bit.ly/paytm-update-kyc",scam,smishing
+8,"We are from CBI. An Aadhaar card registered in your name is involved in money laundering. Press 1 to speak with officer.",scam,vishing
+9,"Your Netflix subscription has expired. Update payment now at bit.ly/netflix-pay to continue watching.",scam,phishing
+10,"Dear winner, your email ID has won $1,000,000 in the Google Annual Award. Provide your bank details to claim.",scam,lottery
+11,"Flipkart: Your order #FK789012 is on hold. Pay ₹99 clearance fee at bit.ly/flipkart-clear to release delivery.",scam,smishing
+12,"FINAL NOTICE: Your Aadhaar linked mobile number will be deactivated in 24 hours. Call 1800-XXX-XXXX immediately.",scam,vishing
+13,"Hi I am from Microsoft. Your computer is sending virus signals. Allow remote access now to fix the issue: anydesk.com/xxx",scam,tech_support
+14,"Urgent: Unusual sign-in to your Gmail detected. Verify identity now or account locked: bit.ly/gmail-verify-2024",scam,phishing
+15,"Crypto Investment Opportunity! Earn 25% monthly returns guaranteed. Join our exclusive group. WhatsApp +1-555-INVEST",scam,investment
+16,"Your package from DTDC is held at customs. Pay ₹250 release fee at: cutt.ly/dtdc-customs-release",scam,smishing
+17,"Respected sir, this is the Income Tax Department. Your PAN has been blacklisted. Call immediately to avoid arrest.",scam,vishing
+18,"Lottery Commission of India. You have won ₹50 Lakh. Send ₹5,000 processing fee to release funds. Ref: LC2024-7721",scam,lottery
+19,"Act now! Your electricity connection will be cut tonight. Call 9988776655 to update your meter immediately.",scam,smishing
+20,"FREE iPhone 15 Pro! You are our 1,000,000th visitor. Click to claim: tinyurl.com/free-iphone-claim-now",scam,phishing
+21,"WhatsApp is expiring! Renew now: bit.ly/whatsapp-renew-free or your account will be deleted in 24 hours.",scam,smishing
+22,"Investment Alert: Double your money in 30 days with our AI trading bot. ₹10,000 becomes ₹20,000 guaranteed!",scam,investment
+23,"Your insurance claim of ₹1,20,000 is approved. Share your bank account number and IFSC to receive funds.",scam,smishing
+24,"This is TRAI. Your mobile number will be disconnected for illegal activity. Press 9 to speak with officer.",scam,vishing
+25,"Amazon: Unverified login from another country. Verify account or it will be suspended: rb.gy/amazon-secure",scam,phishing
+26,"Scholarship for students! Get ₹50,000 annually. Apply now — pay ₹3,000 processing fee to enroll.",scam,job
+27,"Your CIBIL score is damaged. Our experts will fix it in 7 days for ₹5,000. Call 9123456789 for guarantee fix.",scam,financial
+28,"Breaking: COVID relief fund ₹10,000 per family. Register now with Aadhaar and bank details: cutt.ly/covid-relief",scam,phishing
+29,"Your car insurance expires today! Renew at 50% discount. Pay now at goo.gl/ins-renew or coverage lapses.",scam,smishing
+30,"We are police. Your number is linked to cybercrime. Pay ₹50,000 bail online to avoid arrest immediately.",scam,vishing
+31,"Telegram Premium FREE! Activate before midnight: bit.ly/tg-premium-free-2024. Limited slots only!",scam,smishing
+32,"Earn ₹3,000 daily by liking YouTube videos from home. Register for ₹1,500 starter kit. Guaranteed income!",scam,job
+33,"Your Aadhaar is being misused for a SIM card. Block immediately: is.gd/aadhaar-sim-block or face legal action.",scam,smishing
+34,"HDFC Bank: ₹8,500 cashback credited. Collect via: bit.ly/hdfc-cashback-collect. Valid for 2 hours only!",scam,smishing
+35,"Important: Google Pay account will be suspended. Verify UPI pin at: adf.ly/gpay-verify to avoid block.",scam,phishing
+36,"Congratulations! Your PF withdrawal of ₹45,000 is approved. Share OTP received on mobile to process.",scam,otp
+37,"UPI Transaction Alert: ₹15,000 debited. If not done by you, call 1800-XXX-XXXX and share OTP to reverse.",scam,otp
+38,"PM Kisan Yojana: ₹6,000 credit pending. Update your bank account at: cutt.ly/pmkisan-update to receive funds.",scam,phishing
+39,"You are selected for mystery shopper job. Receive ₹5,000 first, then buy gift cards and send codes. Easy work!",scam,job
+40,"Security Alert: Your SBI net banking is locked. Reset via: bit.ly/sbi-netbanking-unlock. Do not delay!",scam,phishing
+41,"Fake arrest warrant in your name. Pay ₹10,000 online to cancel FIR. Call lawyer at 9090909090 immediately.",scam,vishing
+42,"Your RTO driving licence is expired. Avoid fine — renew online at: rb.gy/rto-licence-renew-2024",scam,smishing
+43,"WhatsApp Business: Your account is flagged for spam. Send verification code 847291 to 9988776655 to unblock.",scam,otp
+44,"Earn passive income! Join our MLM network. Invest ₹20,000 — earn ₹2 Lakh in 60 days. 100% guaranteed!",scam,investment
+45,"Your Jio SIM will be deactivated due to illegal activity. Call 198 and share Aadhaar OTP to avoid disconnection.",scam,vishing
+46,"Amazon Pay: Collect ₹5,000 reward. Log in at: is.gd/amzpay-reward and enter OTP to claim cashback.",scam,phishing
+47,"IRCTC: Tatkal ticket fraud reported on your account. Freeze account via: bit.ly/irctc-secure or lose refund.",scam,phishing
+48,"Receive ₹25,000 free scholarship from Bill Gates Foundation. Apply today — pay ₹2,500 admin fee only.",scam,lottery
+49,"Loan approved ₹5 Lakh! No CIBIL required. Get disbursal in 2 hours. Pay ₹3,000 processing fee now.",scam,financial
+50,"Your child's school fee receipt is ready. Pay remaining ₹2,200 via: cutt.ly/school-fee-pay to avoid detention.",scam,phishing
+51,"IRCTC refund ₹1,200 processed. Enter UPI PIN on: bit.ly/irctc-refund-upi to receive in your account.",scam,phishing
+52,"Pension update required. Enter Aadhaar number, bank account, and OTP at: rb.gy/pension-kyc-2024 to continue.",scam,phishing
+53,"Work from home: Data entry jobs available. Earn ₹800 per hour. Pay ₹4,000 registration. Start tomorrow!",scam,job
+54,"Reward Points expiring tonight! Redeem ₹3,500 at: is.gd/rewards-expire. Click or lose them permanently.",scam,smishing
+55,"Exclusive: Get personal loan at 2% interest per annum. Zero documentation. Transfer ₹5,000 to unlock offer.",scam,financial
+56,"Alert: Suspicious login on Flipkart. Click to secure: tiny.cc/flipkart-secure-login before account is deleted.",scam,phishing
+57,"EPFO: Your PF balance ₹82,000 pending. Submit Aadhaar and account number at goo.gl/epfo-claim to get money.",scam,phishing
+58,"Breaking: Government gives ₹5,000 monthly to all smartphone users. Register here: bit.ly/gov-smartphone-aid",scam,phishing
+59,"Your Mutual Fund account has ₹1,20,000 unclaimed. Submit KYC at: cutt.ly/mf-unclaimed-kyc to claim now.",scam,phishing
+60,"Crypto arbitrage bot: invest ₹50,000 see ₹75,000 in 15 days. 1000+ satisfied users. Join Telegram: t.me/cryptowin",scam,investment
+61,"Tax refund ₹18,500 approved by Income Tax Dept. Enter PAN and bank details at: rb.gy/itr-refund-2024",scam,phishing
+62,"SIM Swap detected on your number! Call 9191919191 immediately and share OTP to block unauthorized swap.",scam,vishing
+63,"Earn by watching ads — ₹500 per ad, work 2 hours/day. Deposit ₹3,000 to activate account. Start earning today!",scam,job
+64,"COVID-19 vaccine certificate error. Update your Aadhaar at: is.gd/covid-cert-update to fix records immediately.",scam,phishing
+65,"₹8,88,888 KBC prize for mobile number 98XXXXXXXX. Send ₹7,500 tax deposit to receive cheque. Contact: 7777777777",scam,lottery
+66,"Your Zomato account will be deleted for inactivity. Log in via: bit.ly/zomato-reactivate to save your account.",scam,phishing
+67,"Investor Alert: Pre-IPO shares of XYZ Ltd available at ₹10/share. Guaranteed listing at ₹150. Invest before 5PM!",scam,investment
+68,"Free solar panel scheme for homes. Avail before deadline. Register at goo.gl/solar-scheme. Pay ₹1,500 inspection fee.",scam,phishing
+69,"HR from TCS: Your resume selected for ₹12 LPA role. Pay ₹5,000 training deposit to confirm your joining.",scam,job
+70,"Limited offer: Double data on Jio for 3 months FREE. Activate at: cutt.ly/jio-double-data. Expires midnight!",scam,smishing
+71,"Your BHIM account shows unauthorized access. Freeze now at: tiny.cc/bhim-freeze or you'll lose your balance.",scam,phishing
+72,"Charity alert: Donate ₹500 to flood victims via bit.ly/flood-relief-2024. 90% goes to affected families.",scam,phishing
+73,"Prize notification: Your phone number wins a Toyota Fortuner. Pay ₹25,000 delivery charge to receive vehicle.",scam,lottery
+74,"RBI Notice: Your old ₹500 notes can still be exchanged. Submit Aadhaar at: rb.gy/rbi-note-exchange today.",scam,phishing
+75,"Job offer from Google India: ₹8 LPA package. Pay ₹10,000 background verification fee to proceed with hiring.",scam,job
+76,"Urgent: Reset your UIDAI password now. OTP: 892741. Share on 1800-XXX to complete biometric update.",scam,otp
+77,"Free LPG cylinder scheme — government subsidy. Register with Aadhaar at goo.gl/lpg-subsidy-register today.",scam,phishing
+78,"Amazon Prime subscription renewal failed. Update payment at: bit.ly/prime-renew or access expires in 2 hours.",scam,phishing
+79,"Your vehicle insurance third-party claim ₹75,000 approved. Share accident photos and Aadhaar to get cheque.",scam,financial
+80,"Loan waiver scheme 2024: All pending EMIs cancelled by government. Apply at: cutt.ly/loan-waiver-register",scam,phishing
+81,"Secret government scheme: ₹10,000 per month for unemployed youth. Register with Aadhaar: rb.gy/youth-scheme",scam,phishing
+82,"Call centre job: ₹35,000/month, work from home. Deposit ₹6,000 for equipment. Interview tomorrow at 11 AM.",scam,job
+83,"Airtel: Your number ported without consent. Reverse immediately at is.gd/airtel-port-reverse with OTP.",scam,smishing
+84,"Dear sir, you have unclaimed dividends of ₹95,000. Submit KYC at tiny.cc/dividend-claim within 48 hours.",scam,financial
+85,"Your land records show discrepancy. Pay ₹3,000 online at goo.gl/land-fix to correct government records.",scam,phishing
+86,"Dating app match wants to meet! She/he says invest ₹50,000 in crypto together. Platform: bit.ly/crypto-couple",scam,romance
+87,"Army personnel: I am posted abroad, need help with transfer of $50,000. Will share 20%. Contact via this number.",scam,romance
+88,"Verify your voter ID or it will be cancelled. Update details at: cutt.ly/voter-id-update. Deadline: 3 days.",scam,phishing
+89,"Congratulations! Your lucky number 7891 wins 1kg gold bar. Pay ₹15,000 shipping to receive at your door.",scam,lottery
+90,"WARNING: Your credit card will be charged ₹8,999 for subscription. Cancel at: bit.ly/cancel-subscription now.",scam,phishing
+91,"Data entry work available. Process 200 forms/day, earn ₹600 each. Pay ₹8,000 for software access first.",scam,job
+92,"Breaking: Petrol prices cut by 50%! Get 10 free litres via: rb.gy/petrol-free-scheme. Register with Aadhaar.",scam,phishing
+93,"Your Zomato Gold free 6-month trial activated. Verify at: tiny.cc/zomato-gold or subscription will expire.",scam,phishing
+94,"Emergency! Your son/daughter is in hospital. Need ₹50,000 urgently. Send to UPI: emergencyfund@bank immediately.",scam,vishing
+95,"Bank Merger Notice: Transfer your savings to new account at: bit.ly/bank-merge-transfer before branch closes.",scam,phishing
+96,"Government job offer: Railway recruitment. Pay ₹4,500 exam fee at: cutt.ly/railway-exam-fee to apply.",scam,job
+97,"VISA application approved! Pay remaining ₹12,000 processing at: goo.gl/visa-process to receive your passport.",scam,phishing
+98,"Your FD maturity ₹2,50,000 ready. Submit Form 15H at: rb.gy/fd-maturity-form to avoid TDS deduction.",scam,phishing
+99,"KYC not completed for your UAN (PF account). Submit at: is.gd/uan-kyc-epfo or withdraw will be blocked.",scam,phishing
+100,"Remote job: Amazon product reviewer. Earn ₹1,500/review. Pay ₹5,000 membership. 1000+ people already earning!",scam,job
