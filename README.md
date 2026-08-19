@@ -1,254 +1,277 @@
-# Scam & Phishing Text Detection using NLP
+<div align="center">
 
-**A comparative study of classical ML and deep learning approaches to
-scam/phishing text classification.**
+# 🛡️ ScamShield NLP
 
-> This is a standalone academic project for an NLP course. It is
-> independent of the ScamShield mobile application — no app, backend
-> integration, or product-specific code lives here, only the NLP
-> pipeline: data engineering, exploratory analysis, model training, and
-> comparative evaluation.
+### Scam & Phishing Text Detection — Classical ML vs. Deep Learning, Head to Head
+
+*A comparative NLP study classifying SMS/email messages as scam or legitimate,
+with 5 trained models, a live inference dashboard, and genuine explainable AI.*
+
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-BiLSTM%20%2B%20DistilBERT-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-SVM%20%2F%20LogReg%20%2F%20NB-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+[![Academic Project](https://img.shields.io/badge/Academic-NLP%20Coursework-8A2BE2)](#-overview)
+
+[Overview](#-overview) •
+[Results](#-results) •
+[Demo](#-live-demo) •
+[Explainable AI](#-explainable-ai) •
+[Quick Start](#-quick-start) •
+[Project Structure](#-project-structure)
+
+</div>
 
 ---
 
-## 1. Problem Statement
+## 📖 Overview
 
-Scam and phishing messages (SMS, email) are a widespread social
-engineering threat. This project builds and compares multiple NLP text
-classifiers that label a message as **scam/phishing (1)** or
-**legitimate (0)**, evaluating each on accuracy, recall (catching
-actual scams matters more than overall accuracy — a missed scam is
-worse than a false alarm), inference latency, and model size.
+Scam and phishing messages are one of the most common social-engineering
+attack vectors — SMS smishing, phishing emails, fake prize/lottery texts,
+and urgent "verify your account" messages. This project builds and rigorously
+compares **5 text classifiers**, from classical bag-of-words models to a
+fine-tuned transformer, to answer a practical question: *what actually works
+best for catching scam text, and what does "best" even mean once you weigh
+in speed, size, and which mistakes matter more?*
 
-## 2. Datasets
+Every model in this repo is fully trained, evaluated on a shared held-out
+test set, and wired into a working FastAPI backend + browser dashboard —
+this isn't just notebooks and metrics, it's a runnable system.
 
-Messages were pooled from multiple public sources and unified into a
-single labelled dataset:
+**What makes this more than a metrics table:**
+- 🔍 **Genuine explainable AI** for all 3 deployed models — not a gimmick.
+  Exact linear decomposition for the SVM, gradient × input saliency for the
+  two neural networks.
+- ⚖️ **Model disagreement is surfaced, not hidden** — a "Compare All 3"
+  view shows when models disagree on ambiguous text and *why*, which is
+  more honest (and more interesting) than only ever showing one verdict.
+- 🖥️ **A real, working dashboard** — paste a message, get a live
+  classification with confidence, adjustable decision threshold, and a
+  word-by-word breakdown of the model's reasoning, all running locally.
 
-| Source | Content type |
+---
+
+## 📊 Results
+
+Evaluated on a shared held-out test set of **7,899 messages**.
+
+| Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC | Missed Scams | Latency | Size |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Naive Bayes | 92.59% | 90.88% | 88.99% | 89.93% | 97.54% | 323 | 0.001 ms | 0.31 MB |
+| Logistic Regression | 95.99% | 96.25% | 92.81% | 94.50% | 99.21% | 211 | 0.001 ms | 0.08 MB |
+| **🏆 Linear SVM** | **96.91%** | **96.64%** | 94.99% | **95.81%** | **99.44%** | 147 | 0.006 ms | 0.38 MB |
+| BiLSTM | 95.71% | 94.00% | 94.48% | 94.24% | 98.99% | 162 | 1.014 ms | 12.35 MB |
+| **🎯 DistilBERT** | 96.06% | 93.02% | **96.66%** | 94.80% | 99.33% | **98** | 0.401 ms | 256.1 MB |
+
+<div align="center"><img src="docs/screenshots/eda.png" alt="Dataset & EDA tab" width="850"></div>
+
+### Key findings
+
+- 🥇 **Linear SVM wins on F1 and ROC-AUC** — and does it in **0.006 ms**
+  at **under 1MB**. For this task, a well-tuned linear model on TF-IDF
+  features is extremely hard to beat on efficiency-adjusted accuracy.
+- 🎯 **DistilBERT wins on recall** — it misses only 98 of 7,899 real scams,
+  the fewest of any model, at the cost of more false alarms. The right
+  choice when a missed scam is far more costly than a false positive.
+- 📐 **Classical ≈ deep learning here**, and that's a real finding, not a
+  disappointment: scam/phishing language is lexically distinctive (urgency
+  phrases, links, financial bait), which TF-IDF captures well without
+  needing learned contextual embeddings. Deep learning's edge shows up in
+  *recall on ambiguous cases*, not raw accuracy.
+
+Full per-phase reports: [`reports/eda_report.md`](reports/eda_report.md) ·
+[`reports/nlp_baseline_report.md`](reports/nlp_baseline_report.md) ·
+[`reports/model_comparison_report.md`](reports/model_comparison_report.md)
+
+---
+
+## 💻 Live Demo
+
+A full browser dashboard — not just a notebook — talking to a real FastAPI
+backend running all 5 models.
+
+<div align="center"><img src="docs/screenshots/scanner.png" alt="Scanner tab — live classification with explainable AI" width="850"></div>
+
+<p align="center"><em>Scanner: paste a message → pick a model → get a verdict, a confidence meter, an adjustable decision threshold, and a full explanation of why.</em></p>
+
+<div align="center"><img src="docs/screenshots/comparison.png" alt="Model Comparison tab" width="850"></div>
+
+<p align="center"><em>Model Comparison: sortable metrics table, live bar charts, and per-model confusion matrices — click a row to inspect it.</em></p>
+
+**Dashboard features:**
+
+| Feature | What it does |
 |---|---|
-| MeAJOR Phishing Email Dataset | Phishing emails |
-| Enron Email Dataset | Legitimate emails (negative class) |
-| Enron-Spam | Spam/phishing emails |
-| SMS Spam Collection | SMS spam and legitimate SMS |
+| **Live Scanner** | Classify any message with SVM, BiLSTM, or DistilBERT in real time |
+| **Explainable AI** | Word-level breakdown of *why* — see [below](#-explainable-ai) |
+| **Compare All 3** | Runs all 3 models on the same text and flags disagreement |
+| **Decision threshold slider** | Drag to explore the precision/recall trade-off live |
+| **Batch mode** | Classify a whole list of messages in one request |
+| **Session history** | Every scan logged; export to CSV for a report appendix |
+| **Model Comparison** | Sortable metrics table + charts across all 5 models |
+| **Dataset & EDA** | Class balance, message length, and source composition charts |
 
-Labels: `0` = legitimate, `1` = scam/phishing.
+---
 
-Cleaning steps applied (see `src/data/clean.py`): deduplication,
-HTML/header stripping from raw emails, normalization of whitespace and
-encoding artifacts, and removal of empty/near-empty records. See
-`reports/eda_report.md` for full exploratory data analysis (class
-balance, message length distributions, vocabulary statistics).
+## 🔬 Explainable AI
 
-`dataset/` in this repo contains a **200-message held-out evaluation
-set** (100 scam, 100 safe — see `dataset/README.md`) used for sanity
-end-to-end testing, not the full training corpus. **The full raw and
-processed training CSVs (used by `src/data/ingest.py` /
-`src/data/clean.py` / `src/data/split.py`) need to be copied back in
-from your local machine** — see "Restoring local files" below.
+Most "explainable AI" demos either fake it or only work for one easy model.
+This one is honest about the difference between **exact** and **approximate**
+explanations, and implements a real method for each:
 
-## 3. Methodology
+| Model | Method | Why |
+|---|---|---|
+| **SVM** | **Exact** — `coefficient × TF-IDF weight` per token | The model is linear, so this *is* its actual internal math, just surfaced — not an approximation. |
+| **BiLSTM** | **Approximate** — gradient × input saliency | A standard, published attribution method ([Simonyan et al., 2013](https://arxiv.org/abs/1312.6034)): backprop the predicted score to the word embeddings and take `gradient · embedding` per token. |
+| **DistilBERT** | **Approximate** — gradient × input saliency | Same method, adapted for subword tokens (WordPiece pieces are merged back into full words before ranking). |
+
+Every prediction shows the message with contributing words highlighted
+directly in the text, plus a ranked bar chart of the top words pushing
+toward *scam* vs. toward *safe* — and the UI clearly labels which kind of
+explanation you're looking at.
+
+---
+
+## 🚀 Quick Start
+
+```bash
+git clone https://github.com/yash9769/ScamShield-nlp.git
+cd ScamShield-nlp
+pip install -r requirements.txt
+```
+
+> **Note:** model weights are stored via [Git LFS](https://git-lfs.com/).
+> If `git clone` doesn't pull them automatically, run `git lfs pull` after cloning.
+
+### Option A — Full visual dashboard (recommended)
+
+```bash
+# Terminal 1
+uvicorn app:app --reload
+
+# Terminal 2
+python -m http.server 5500 --directory frontend
+```
+
+Open **http://127.0.0.1:5500** in a browser.
+
+### Option B — Quick CLI demo, no server
+
+```bash
+python demo_predict.py
+```
+
+### Option C — FastAPI's interactive `/docs` page
+
+```bash
+uvicorn app:app --reload
+# then open http://127.0.0.1:8000/docs
+```
+
+---
+
+## 🧠 Methodology
 
 | Phase | Description | Script |
-|---|---|---|
+|:---:|---|---|
 | 1 | Data ingestion from raw sources | `src/data/ingest.py` |
 | 2 | Cleaning & deduplication | `src/data/clean.py` |
-| 3 | Train / validation / test split | `src/data/split.py` |
-| 3 | Exploratory Data Analysis | `src/eda/eda.py` |
-| 4 | Classical NLP baselines: TF-IDF + Naive Bayes / Logistic Regression / SVM | `src/models/train_nlp_baselines.py` |
-| 5 | Deep learning: BiLSTM (PyTorch) | `src/models/train_lstm.py` |
-| 5 | Deep learning: DistilBERT (fine-tuned) | `src/models/train_distilbert.py` |
+| 3 | Train / validation / test split + EDA | `src/data/split.py`, `src/eda/eda.py` |
+| 4 | Classical baselines — TF-IDF + Naive Bayes / Logistic Regression / SVM | `src/models/train_nlp_baselines.py` |
+| 5 | Deep learning — BiLSTM (PyTorch) | `src/models/train_lstm.py` |
+| 5 | Deep learning — DistilBERT (fine-tuned) | `src/models/train_distilbert.py` |
 | 6 | Comparative evaluation across all 5 models | `src/models/compare_models.py` |
 
-## 4. Results (held-out test set, 7,899 samples)
+**Datasets** — unified from 4 public sources into a single labelled corpus
+(`0` = legitimate, `1` = scam/phishing):
 
-| Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC | Missed Scams (FN) | Latency | Size |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| Naive Bayes | 0.9259 | 0.9088 | 0.8899 | 0.8993 | 0.9754 | 323 | 0.001 ms | 0.31 MB |
-| Logistic Regression | 0.9599 | 0.9625 | 0.9281 | 0.9450 | 0.9921 | 211 | 0.001 ms | 0.08 MB |
-| **Linear SVM** | **0.9691** | **0.9664** | 0.9499 | **0.9581** | **0.9944** | 147 | 0.006 ms | 0.38 MB |
-| BiLSTM | 0.9571 | 0.9400 | 0.9448 | 0.9424 | 0.9899 | 162 | 1.014 ms | 12.35 MB |
-| **DistilBERT** | 0.9606 | 0.9302 | **0.9666** | 0.9480 | 0.9933 | **98** | 0.401 ms | 256.1 MB |
+| Source | Content |
+|---|---|
+| [MeAJOR Phishing Email Dataset](https://www.kaggle.com/datasets) | Phishing emails |
+| Enron Email Dataset | Legitimate emails (negative class) |
+| Enron-Spam | Spam/phishing emails |
+| SMS Spam Collection (UCI) | SMS spam and legitimate SMS |
 
-**Key findings:**
-- **Linear SVM** achieves the best F1-score (0.9581) and ROC-AUC
-  (0.9944) with sub-millisecond inference and under 1MB total size —
-  the strongest accuracy/efficiency trade-off of the five.
-- **DistilBERT** achieves the highest recall (96.66%), missing only 98
-  of 7,899 scam messages — the best choice when minimizing missed
-  scams matters more than raw efficiency.
-- Classical linear models (SVM, Logistic Regression) matched or beat
-  the deep learning models here — a reflection of how lexically
-  distinctive scam/phishing language tends to be (urgency phrases,
-  links, financial terms), which TF-IDF features capture well without
-  needing learned embeddings.
+`dataset/` in this repo ships a 200-message held-out sanity-test set, not
+the full training corpus — the full raw/processed CSVs are only needed if
+you want to re-run training from scratch (not required to run the demo).
 
-Full per-phase reports with additional detail: `reports/eda_report.md`,
-`reports/nlp_baseline_report.md`, `reports/lstm_results.json`,
-`reports/distilbert_results.json`, `reports/model_comparison_report.md`.
+---
 
-## 5. Project Structure
+## 📁 Project Structure
 
 ```
-├── dataset/                  # small held-out evaluation set (200 msgs)
-├── models/                   # trained model artifacts
+ScamShield-nlp/
+├── app.py                        # FastAPI backend (predict / explain / compare)
+├── demo_predict.py                # CLI demo, no server needed
+├── frontend/
+│   ├── index.html                 # dashboard (Scanner / Comparison / EDA tabs)
+│   └── assets/                    # EDA chart images used by the dashboard
+├── docs/screenshots/               # README screenshots
+├── models/                        # trained artifacts (tracked via Git LFS)
 │   ├── naive_bayes.joblib
 │   ├── logistic_regression.joblib
 │   ├── svm.joblib
 │   ├── tfidf_vectorizer.joblib
-│   ├── lstm_tokenizer.json
 │   ├── bilstm_model.pt
+│   ├── lstm_tokenizer.json
 │   └── distilbert_scamshield/
-├── reports/                  # EDA + evaluation reports (markdown + json)
+├── reports/                       # EDA + evaluation reports (md + json)
 ├── src/
 │   ├── config.py
-│   ├── data/                 # ingest, clean, split, stats
-│   ├── eda/                  # exploratory data analysis
-│   └── models/               # training scripts + predictor.py (inference)
-├── app.py                    # optional FastAPI demo for live predictions
-├── frontend/
-│   └── index.html            # visual web demo (talks to app.py's API)
-├── demo_predict.py           # simple CLI demo — no server needed
+│   ├── data/                      # ingest, clean, split
+│   ├── eda/                       # exploratory data analysis
+│   └── models/                    # training scripts + predictor.py (inference)
+├── dataset/                        # small held-out evaluation set
 └── requirements.txt
 ```
 
-## 6. Restoring local files (optional — only for full re-training)
+---
 
-Everything needed to run the demo and view results is already included
-in this package — trained weights for all 5 models (including
-`models/bilstm_model.pt`) and all report figures (`reports/figures/`).
+## 🔌 API Reference
 
-The only thing **not** included is the full raw/processed training
-corpus (`dataset/raw/`, `dataset/processed/` — the MeAJOR, Enron,
-Enron-Spam, and SMS Spam Collection CSVs). You only need these if you
-want to re-run training end-to-end from scratch; copy them back in from
-your local machine if so. They're not needed to run the demo or write
-the report.
+| Endpoint | Method | Description |
+|---|:---:|---|
+| `/predict` | `POST` | Classify text with a chosen backend (`svm` / `bilstm` / `distilbert`) |
+| `/predict/batch` | `POST` | Classify a list of texts in one call |
+| `/explain` | `POST` | Prediction + per-token attribution (exact for SVM, saliency for the others) |
+| `/models/info` | `GET` | Metrics + confusion matrices for all 5 trained models |
+| `/health` | `GET` | Health check |
 
-## 7. Running the demo
+<details>
+<summary><strong>Example request/response</strong></summary>
 
 ```bash
-pip install -r requirements.txt
-
-# Option A: quick CLI demo, no server
-python demo_predict.py
-
-# Option B: FastAPI demo with a /docs page for live testing
-uvicorn app:app --reload
-# then open http://127.0.0.1:8000/docs
-
-# Option C: full visual dashboard (recommended for presenting to a professor)
-# 1. In one terminal:
-uvicorn app:app --reload
-# 2. In a second terminal, from the project root:
-python -m http.server 5500 --directory frontend
-# 3. Open http://127.0.0.1:5500 in a browser
+curl -X POST http://127.0.0.1:8000/explain \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Congratulations! You won a prize, click here to claim", "backend": "svm"}'
 ```
 
-**The backend (`uvicorn app:app`) must be running before opening the
-dashboard** — it's a static page that calls the FastAPI API for every
-prediction.
+```json
+{
+  "is_scam": true,
+  "probability": 0.97,
+  "risk": "high",
+  "method": "exact",
+  "top_scam_tokens": [{"token": "claim", "weight": 0.326}, ...],
+  "top_safe_tokens": [{"token": "congratulations", "weight": -0.224}, ...]
+}
+```
+</details>
 
-### Dashboard features
+---
 
-**Scanner tab**
-- Paste any message, pick a model (SVM / BiLSTM / DistilBERT), get a
-  verdict with a segmented probability meter and risk level
-- **Explainable AI for all 3 models** — not just SVM. SVM gets exact
-  linear decomposition; BiLSTM and DistilBERT get gradient × input
-  saliency (a real, standard attribution method — Simonyan et al. 2013 —
-  clearly labeled "approximate" in the UI since these are non-linear
-  models, unlike SVM's "exact" label). Every prediction is explained,
-  whichever model you pick.
-- **Compare All 3** button: runs the same message through SVM, BiLSTM,
-  and DistilBERT at once and flags when they disagree. Model
-  disagreement on ambiguous/borderline text (e.g. a legitimate-sounding
-  bill reminder that also matches phishing phrasing) is a real,
-  expected phenomenon worth discussing — not a bug — and this makes it
-  visible at a glance instead of requiring three separate scans.
-- **Decision threshold slider**: drag to see how the verdict changes as
-  you move the classification cutoff away from 0.5 — a hands-on way to
-  show the precision/recall trade-off without needing new backend calls.
-- **Batch mode**: paste multiple messages (one per line) and classify
-  all of them in one request via `/predict/batch`.
-- **Session history**: every scan you run is logged in a table for the
-  rest of the session — handy if your teacher asks to compare a few
-  messages side by side.
+## 📚 References
 
-**Model Comparison tab**
-- Bar chart comparing all 5 trained models on any of Accuracy /
-  Precision / Recall / F1 / ROC-AUC (click a metric to switch)
-- Full metrics table with the best value per column highlighted
-- Click any model row to see its confusion matrix (TN/FP/FN/TP) from
-  the actual test-set evaluation
+- Sanh et al., *[DistilBERT, a distilled version of BERT](https://arxiv.org/abs/1910.01108)* (2019)
+- Simonyan et al., *[Deep Inside Convolutional Networks: Visualising Image Classification Models and Saliency Maps](https://arxiv.org/abs/1312.6034)* (2013) — the saliency method used for BiLSTM/DistilBERT explainability
+- Pedregosa et al., *[Scikit-learn: Machine Learning in Python](https://jmlr.org/papers/v12/pedregosa11a.html)*, JMLR (2011)
+- SMS Spam Collection Dataset, UCI Machine Learning Repository
 
-**Dataset & EDA tab**
-- Dataset summary stats and the actual EDA charts generated during
-  training (class distribution, message length distribution, samples
-  by type/source, and the model comparison chart)
+---
 
-### New backend endpoints (added for the dashboard)
+<div align="center">
 
-- `POST /explain` — prediction + per-token attribution for any of the 3
-  backends (exact for SVM, gradient × input saliency for BiLSTM/DistilBERT)
-- `GET /models/info` — metrics and confusion matrices for all 5 models,
-  read from `reports/*.json`
-- `POST /predict/batch` — classify a list of texts in one call
+**Academic project — NLP coursework.** Independent of any commercial application.
 
-All of the above were tested with real HTTP requests (and the frontend
-was tested end-to-end in a headless browser, including the SVM/BiLSTM
-vs. DistilBERT disagreement scenario) while building this, not just
-written and assumed to work.
-
-### A note on model disagreement
-
-You may see the 3 models disagree on ambiguous messages — e.g. a
-routine-sounding bill reminder that also happens to match common
-phishing phrasing (urgency + payment + link). This is expected, not a
-bug: different architectures draw the decision boundary differently on
-borderline cases. It's genuinely good material to discuss in your
-report/demo — the "Compare All 3" button in the Scanner tab surfaces
-this directly, and the per-model explainability panel shows *why* each
-model landed where it did.
-
-### UI/UX fixes and additional features
-
-A pass over the dashboard turned up a few real issues, fixed here:
-
-- **Fixed a real explainability bug**: the highlighted-text view used
-  plain substring matching with no word boundaries, so short tokens
-  like "or" could highlight *inside* unrelated words (e.g. matching
-  inside "before" or "provider"). Rewritten to tokenize properly and
-  match whole words/phrases only.
-- **Fixed a dead UI affordance**: the Model Comparison table's column
-  headers looked clickable (cursor changed to a pointer) but did
-  nothing. They now actually sort the table, including a visible
-  ascending/descending indicator.
-- **Fixed keyboard accessibility**: the example chips and the "switch
-  to batch mode" toggle were `<div>`/`<span>` elements with no keyboard
-  or screen-reader support. They're now real `<button>` elements.
-- **Added a truncation warning**: BiLSTM only reads the first 200
-  words and DistilBERT the first 128 tokens of whatever you paste —
-  previously this happened silently. There's now a live word counter
-  that warns you before scanning if your text will get cut off.
-- **Added a "loading model" hint**: BiLSTM/DistilBERT load lazily on
-  first use and can take a couple of seconds the first time — without
-  feedback this looked like the app had frozen. The scan button now
-  says so explicitly on a first use.
-- **Added clear/reset controls**: a "clear" button for the message
-  box, and a "clear" + "export CSV" pair for session history (handy
-  for pulling scan results into your report's appendix).
-
-All of the above were verified with a real headless-browser test run
-(Playwright), not just written and assumed to work — including
-confirming the highlighting fix no longer breaks on the exact message
-that originally exposed the bug.
-
-## 8. References
-
-- MeAJOR Phishing Email Dataset
-- Enron Email Dataset
-- Enron-Spam Dataset
-- SMS Spam Collection Dataset (UCI)
-- Sanh et al., *DistilBERT, a distilled version of BERT* (2019)
-- Scikit-learn: Pedregosa et al., *JMLR* (2011)
+</div>
