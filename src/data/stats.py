@@ -1,3 +1,10 @@
+# =============================================================================
+# FILE: src/data/stats.py             (OPTIONAL helper: dataset statistics)
+# PURPOSE: Print a quick text report about the unified dataset: size, class
+#          balance, how many messages per source/type, and text-length stats.
+#          It does not change any data or save anything - console output only.
+# RUN WITH: python -m src.data.stats
+# =============================================================================
 import os
 import pandas as pd
 import numpy as np
@@ -8,36 +15,39 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from src.config import PROCESSED_DATASET_PATH
 
 def compute_statistics():
+    """Load the cleaned dataset and print counts, percentages and length statistics."""
     print("Computing statistics for the unified ScamShield dataset...")
     if not os.path.exists(PROCESSED_DATASET_PATH):
         raise FileNotFoundError(f"Processed dataset not found at {PROCESSED_DATASET_PATH}. Please run clean.py first.")
-        
+
     df = pd.read_csv(PROCESSED_DATASET_PATH)
-    
+
     # 1. Total samples
     total_samples = len(df)
-    
+
+    # value_counts() counts how many rows have each label. .get(0, 0) returns 0 if absent.
     # 2. Legitimate vs Phishing counts and ratio
     label_counts = df['label'].value_counts()
     legit_count = label_counts.get(0, 0)
     phishing_count = label_counts.get(1, 0)
+    # The `if total_samples > 0 else 0` guards against division by zero on an empty file
     legit_ratio = (legit_count / total_samples) * 100 if total_samples > 0 else 0
     phishing_ratio = (phishing_count / total_samples) * 100 if total_samples > 0 else 0
-    
+
     # 3. Source counts
     source_counts = df['source'].value_counts()
-    
+
     # 4. Type counts
     type_counts = df['type'].value_counts()
-    
-    # 5. Text length metrics
+
+    # 5. Text length metrics  (length = number of CHARACTERS, not words)
     # Handle possible empty text (should not happen if cleaned properly, but for safety)
     text_lengths = df['text'].apply(lambda x: len(str(x)))
     min_len = text_lengths.min()
     max_len = text_lengths.max()
     mean_len = text_lengths.mean()
-    median_len = text_lengths.median()
-    
+    median_len = text_lengths.median()   # median is more robust than mean when a few emails are extremely long
+
     # Print the report
     print("\n" + "="*50)
     print("         SCAMSHIELD DATASET STATISTICS REPORT         ")

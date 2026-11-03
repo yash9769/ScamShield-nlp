@@ -9,10 +9,18 @@ interactive prompt so you can type your own.
 Usage:
     python demo_predict.py
 """
+# EXTRA NOTES (comments only):
+#  * Run it from the PROJECT ROOT folder, otherwise `from src.models.predictor import ...`
+#    below will not be found.
+#  * It does NOT use the web API; it calls ScamPredictor directly in the same process.
+#  * The first message may be slow: models are lazy-loaded the first time each is used.
 import sys
 
 from src.models.predictor import ScamPredictor
 
+# Hand-written examples: 3 scams (prize, bank/OTP, lottery) and 2 legitimate messages
+# (a friend's text and a genuine delivery notice). The Amazon one is a nice "hard" example
+# because it contains a link but is legitimate.
 EXAMPLES = [
     "Congratulations! You have WON $5000. Click here now to claim your prize: bit.ly/claim99",
     "Hey, are we still on for lunch tomorrow at 12?",
@@ -23,11 +31,15 @@ EXAMPLES = [
 
 
 def show(text, predictor):
+    """Print the verdict of all three models for one message."""
     svm_result = predictor.predict(text, backend="svm")
     print(f"\nText: {text}")
+    # `:<5` left-aligns the word SCAM/safe in a 5-character column so the output lines up
     print(f"  SVM        -> {'SCAM' if svm_result['is_scam'] else 'safe':<5} "
           f"(prob={svm_result['probability']:.4f}, risk={svm_result['risk']})")
 
+    # try/except so that a missing model file (e.g. Git LFS weights not downloaded)
+    # prints "unavailable" instead of crashing the whole demo
     try:
         bilstm_result = predictor.predict(text, backend="bilstm")
         print(f"  BiLSTM     -> {'SCAM' if bilstm_result['is_scam'] else 'safe':<5} "
@@ -46,6 +58,7 @@ def show(text, predictor):
 
 
 def main():
+    """Run the built-in examples, then loop reading messages typed by the user."""
     print("Loading models...")
     predictor = ScamPredictor(backend="svm")
 
@@ -62,11 +75,14 @@ def main():
         try:
             text = input("\n> ").strip()
         except (EOFError, KeyboardInterrupt):
+            # Ctrl+D (EOF) or Ctrl+C ends the loop cleanly
             break
+        # empty line or quit/exit also ends the loop
         if not text or text.lower() in ("quit", "exit"):
             break
         show(text, predictor)
 
 
 if __name__ == "__main__":
+    # sys.exit(main()): main() returns None -> exit code 0 (success)
     sys.exit(main())

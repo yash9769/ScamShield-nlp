@@ -1,3 +1,15 @@
+# =============================================================================
+# FILE: src/models/compare_models.py  (PIPELINE STAGE 6: COMPARE ALL 5 MODELS)
+# PURPOSE: Bring the results of all five trained models together:
+#            * quality metrics -> READ from the JSON files written by the training scripts
+#              (nothing is re-scored here)
+#            * latency (ms per message) and file size (MB) -> MEASURED here
+#          Then draw a comparison chart and write the final report + JSON summary.
+# INPUT:   reports/nlp_baseline_results.json, lstm_results.json, distilbert_results.json,
+#          models/*, dataset/processed/test.csv
+# OUTPUT:  reports/figures/model_comparison.png, reports/model_comparison_report.md,
+#          reports/model_comparison_results.json  (the API's /models/info reads this one)
+# =============================================================================
 import os
 import sys
 import json
@@ -22,6 +34,8 @@ FIGURES_DIR = os.path.join(REPORTS_DIR, 'figures')
 
 
 class DistilBertTestDataset(Dataset):
+    """Same idea as DistilBertDataset in train_distilbert.py: tokenise each text when requested.
+    Used here only to build one batch of 200 messages for the latency measurement."""
     def __init__(self, texts, labels, tokenizer, max_len=128):
         self.texts = texts
         self.labels = labels
@@ -43,9 +57,11 @@ class DistilBertTestDataset(Dataset):
 
 
 def get_file_size_mb(path):
+    """Size on disk in megabytes. For a FOLDER (DistilBERT is a directory), sum all its files."""
     if os.path.isfile(path):
         return round(os.path.getsize(path) / 1024 / 1024, 2)
     elif os.path.isdir(path):
+        # os.walk visits every sub-folder; dp = directory path, fn = file names in it
         total = sum(os.path.getsize(os.path.join(dp, f))
                     for dp, dn, fn in os.walk(path) for f in fn)
         return round(total / 1024 / 1024, 2)
@@ -53,6 +69,7 @@ def get_file_size_mb(path):
 
 
 def compare_models():
+    """Collect metrics + measure latency/size for all 5 models, then write chart and reports."""
     print("Starting Phase 6: Comprehensive Model Comparison...")
     os.makedirs(FIGURES_DIR, exist_ok=True)
 
@@ -64,9 +81,10 @@ def compare_models():
     device = torch.device("cuda" if torch.cuda.is_available() else
                           ("mps" if torch.backends.mps.is_available() else "cpu"))
 
+    # Final dictionary: model name -> its metrics (+ latency, size)
     all_results = {}
 
-    # ─── 1. Load pre-computed NLP results ───────────────────────────────────
+    # ─── 1. CLASSICAL MODELS: metrics come from nlp_baseline_results.json ───────
     nlp_path = os.path.join(REPORTS_DIR, 'nlp_baseline_results.json')
     with open(nlp_path) as f:
         nlp_results = json.load(f)
@@ -81,6 +99,9 @@ def compare_models():
     ]:
         clf = joblib.load(os.path.join(MODELS_DIR, model_file))
 
+        # LATENCY: time clf.predict() on the first 200 test rows, divide by 200 -> ms per message.
+        # Caveat: this times ONLY the classifier (TF-IDF conversion was done beforehand), so
+        # classical-model latency is slightly under-stated vs. the neural models.
         # Latency: average over 200 samples
         sample = X_test_tfidf[:200]
         start = time.perf_counter()
@@ -88,6 +109,7 @@ def compare_models():
         elapsed = (time.perf_counter() - start) / 200 * 1000  # ms per sample
 
         m = nlp_results.get(model_name) or nlp_results.get("SVM (Calibrated Linear)")
+        # In the JSON the SVM is saved as "SVM (Calibrated Linear)" but is displayed as "Linear SVM"
         # Use correct key for SVM
         if model_name == "Linear SVM":
             m = nlp_results.get("SVM (Calibrated Linear)", {})
@@ -100,11 +122,11 @@ def compare_models():
             "ROC-AUC":   m.get("ROC-AUC", 0),
             "Latency_ms": round(elapsed, 3),
             "Model_Size_MB": get_file_size_mb(os.path.join(MODELS_DIR, model_file)),
-            "FN": m.get("Confusion Matrix", {}).get("FN", "N/A"),
+            "FN": m.get("Confusion Matrix", {}).get("FN", "N/A"),    # FN = missed scams
         }
         print(f"[{model_name}] Latency: {elapsed:.3f} ms/sample | Size: {all_results[model_name]['Model_Size_MB']} MB")
 
-    # ─── 2. BiLSTM ────────────────────────────────────────────────────────────
+    # ─── 2. BiLSTM: metrics from lstm_results.json; latency measured on ONE batch of 200 ───
     print("\nEvaluating BiLSTM on test set for latency measurement...")
     lstm_tok = SimpleTokenizer.load(os.path.join(MODELS_DIR, 'lstm_tokenizer.json'))
     lstm_ds = TextDataset(X_test_raw[:200], y_test[:200], lstm_tok)
@@ -114,11 +136,13 @@ def compare_models():
     lstm_model.load_state_dict(torch.load(os.path.join(MODELS_DIR, 'bilstm_model.pt'), map_location=device))
     lstm_model.eval()
 
-    X_b, _ = next(iter(lstm_loader))
+    X_b, _ = next(iter(lstm_loader))     # take the single batch of 200 messages
     X_b = X_b.to(device)
     start = time.perf_counter()
     with torch.no_grad():
         lstm_model(X_b)
+    # Whole batch time / 200 = AMORTISED ms per message (batched, so not directly comparable
+    # with the classical models above)
     elapsed = (time.perf_counter() - start) / 200 * 1000
 
     with open(os.path.join(REPORTS_DIR, 'lstm_results.json')) as f:
@@ -136,7 +160,7 @@ def compare_models():
     }
     print(f"[BiLSTM] Latency: {elapsed:.3f} ms/sample | Size: {all_results['BiLSTM']['Model_Size_MB']} MB")
 
-    # ─── 3. DistilBERT ────────────────────────────────────────────────────────
+    # ─── 3. DistilBERT: metrics from distilbert_results.json; latency on ONE batch of 200 ───
     print("\nEvaluating DistilBERT latency on 200 test samples...")
     db_tok = DistilBertTokenizer.from_pretrained(os.path.join(MODELS_DIR, 'distilbert_scamshield'))
     db_model = DistilBertForSequenceClassification.from_pretrained(
@@ -164,12 +188,13 @@ def compare_models():
         "F1":        db_data["F1"],
         "ROC-AUC":   db_data["ROC-AUC"],
         "Latency_ms": round(elapsed, 3),
+        # DistilBERT is a folder (config + weights + tokenizer files), so the whole folder is measured
         "Model_Size_MB": get_file_size_mb(os.path.join(MODELS_DIR, 'distilbert_scamshield')),
         "FN": db_data["Confusion Matrix"]["FN"],
     }
     print(f"[DistilBERT] Latency: {elapsed:.3f} ms/sample | Size: {all_results['DistilBERT']['Model_Size_MB']} MB")
 
-    # ─── 4. Comparison Bar Chart ───────────────────────────────────────────────
+    # ─── 4. BAR CHART: one small panel per metric, one bar per model ───────────
     model_names = list(all_results.keys())
     metrics = ["Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]
     colors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6']
@@ -181,6 +206,8 @@ def compare_models():
         vals = [all_results[m][metric] for m in model_names]
         bars = ax.bar(model_names, vals, color=color, alpha=0.85, edgecolor='white')
         ax.set_title(metric, fontsize=13, weight='bold')
+        # y-axis starts at 0.85 (not 0) to zoom in, because all models score high; this makes
+        # small differences visible but also exaggerates them visually
         ax.set_ylim(0.85, 1.0)
         ax.set_xticklabels(model_names, rotation=30, ha='right', fontsize=9)
         ax.set_ylabel("Score")
@@ -194,11 +221,15 @@ def compare_models():
     plt.close()
     print(f"\nSaved comparison chart to: {chart_path}")
 
-    # ─── 5. Markdown Report ───────────────────────────────────────────────────
+    # ─── 5. MARKDOWN REPORT ─────────────────────────────────────────────────
+    # max(dict, key=...) returns the model NAME whose chosen metric is largest
     best_f1  = max(all_results, key=lambda k: all_results[k]['F1'])
     best_rec = max(all_results, key=lambda k: all_results[k]['Recall'])
     best_auc = max(all_results, key=lambda k: all_results[k]['ROC-AUC'])
 
+    # (No comments inside the triple-quoted strings: they would end up in the report text.
+    #  The "Model Selection Recommendation" paragraph below is hand-written text, and its
+    #  numbers (94.99%, 147, 96.66%, 98) are typed in, not computed.)
     md = f"""# ScamShield — Phase 6: Comprehensive Model Comparison Report
 
 Empirical comparison of all 5 models evaluated on the **held-out test set** (7,899 samples).
@@ -252,7 +283,7 @@ task is learnable with recurrent architectures.
         f.write(md)
     print(f"Saved model comparison report to: {report_path}")
 
-    # Save JSON summary
+    # Save JSON summary  (consumed by app.py -> GET /models/info -> the dashboard)
     json_out = os.path.join(REPORTS_DIR, 'model_comparison_results.json')
     with open(json_out, 'w') as f:
         json.dump(all_results, f, indent=2)

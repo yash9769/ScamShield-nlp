@@ -1,8 +1,19 @@
+# =============================================================================
+# FILE: src/eda/eda.py                (PIPELINE STAGE 3b: EXPLORATORY DATA ANALYSIS)
+# PURPOSE: EDA = "look at the data before modelling". This script draws 4 charts
+#          and writes a Markdown report summarising the dataset:
+#            1. class distribution (legit vs scam)
+#            2. number of messages per source dataset
+#            3. email vs SMS share
+#            4. text-length distribution (log scale)
+# INPUT:   dataset/processed/unified_text_dataset.csv
+# OUTPUT:  reports/figures/*.png  and  reports/eda_report.md
+# =============================================================================
 import os
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import matplotlib.pyplot as plt     # basic plotting library
+import seaborn as sns               # nicer statistical charts built on matplotlib
 import sys
 
 # Ensure project root is in sys.path
@@ -14,6 +25,7 @@ FIGURES_DIR = os.path.join(REPORTS_DIR, 'figures')
 EDA_REPORT_PATH = os.path.join(REPORTS_DIR, 'eda_report.md')
 
 def set_style():
+    """Apply one consistent look (dark grid, readable font sizes) to every chart."""
     sns.set_theme(style="darkgrid")
     plt.rcParams.update({
         'font.size': 12,
@@ -25,21 +37,25 @@ def set_style():
     })
 
 def generate_eda():
+    """Create the 4 figures and the Markdown EDA report."""
     print("Starting Exploratory Data Analysis (EDA)...")
     os.makedirs(FIGURES_DIR, exist_ok=True)
     set_style()
-    
+
     df = pd.read_csv(PROCESSED_DATASET_PATH)
     total_samples = len(df)
-    
+
+    # ---- CHART 1: how many legit vs scam messages (is the data imbalanced?) ----
     # 1. Class Distribution Plot
     plt.figure(figsize=(8, 6))
+    # countplot = bar chart of how many rows have each value of 'label' (green=legit, red=scam)
     ax = sns.countplot(data=df, x='label', palette=['#2ecc71', '#e74c3c'])
     plt.title("ScamShield: Class Distribution (Legitimate vs Phishing)")
     plt.xlabel("Label (0 = Legitimate, 1 = Phishing)")
     plt.ylabel("Sample Count")
     ax.set_xticklabels(["Legitimate (0)", "Phishing (1)"])
-    
+
+    # ax.patches are the drawn bars; we write count + percentage in the middle of each bar
     # Annotate bars with counts & percentages
     for p in ax.patches:
         height = p.get_height()
@@ -47,36 +63,39 @@ def generate_eda():
         ax.annotate(f'{height:,}\n({percentage:.1f}%)',
                     (p.get_x() + p.get_width() / 2., height / 2),
                     ha='center', va='center', fontsize=12, color='white', weight='bold')
-                    
+
     plt.tight_layout()
     class_fig_path = os.path.join(FIGURES_DIR, 'class_distribution.png')
-    plt.savefig(class_fig_path, dpi=300)
-    plt.close()
+    plt.savefig(class_fig_path, dpi=300)   # dpi=300 -> print-quality resolution
+    plt.close()                            # free memory before drawing the next figure
     print(f"Saved figure: {class_fig_path}")
 
+    # ---- CHART 2: messages per source dataset (shows data variety) ----
     # 2. Samples by Source Plot
     plt.figure(figsize=(10, 7))
-    source_order = df['source'].value_counts().index
+    source_order = df['source'].value_counts().index   # largest source first
     ax = sns.countplot(data=df, y='source', order=source_order, palette='viridis')
     plt.title("ScamShield: Sample Count by Source Dataset")
     plt.xlabel("Sample Count")
     plt.ylabel("Dataset Source")
-    
+
     for p in ax.patches:
         width = p.get_width()
         ax.annotate(f' {width:,}', (width, p.get_y() + p.get_height()/2),
                     ha='left', va='center', fontsize=11, color='black', weight='bold')
-                    
+
     plt.tight_layout()
     source_fig_path = os.path.join(FIGURES_DIR, 'samples_by_source.png')
     plt.savefig(source_fig_path, dpi=300)
     plt.close()
     print(f"Saved figure: {source_fig_path}")
 
+    # ---- CHART 3: email vs SMS share (donut chart) ----
     # 3. Samples by Type Plot
     plt.figure(figsize=(7, 7))
     type_counts = df['type'].value_counts()
     colors = ['#3498db', '#f39c12']
+    # wedgeprops width=0.4 turns the pie into a donut
     plt.pie(type_counts, labels=type_counts.index, autopct='%1.1f%%', startangle=140, colors=colors,
             textprops={'fontsize': 14, 'weight': 'bold'}, wedgeprops=dict(width=0.4, edgecolor='w'))
     plt.title("ScamShield: Samples by Communication Type")
@@ -86,6 +105,9 @@ def generate_eda():
     plt.close()
     print(f"Saved figure: {type_fig_path}")
 
+    # ---- CHART 4: how long are messages? ----
+    # Lengths range from ~10 characters (SMS) to many thousands (emails), so a LOG
+    # scale on the x-axis is used to make both visible in one chart.
     # 4. Text Length Distribution Plot (Log Scale)
     df['char_length'] = df['text'].apply(lambda x: len(str(x)))
     plt.figure(figsize=(10, 6))
@@ -101,10 +123,16 @@ def generate_eda():
     plt.close()
     print(f"Saved figure: {length_fig_path}")
 
+    # ---- MARKDOWN REPORT ----
+    # NOTE FOR VIVA: in the text below, some numbers ("11 sources", "~1.69 : 1",
+    # "47,500 Emails / 5,160 SMS") are TYPED IN as constants, while the totals,
+    # class counts and the length table are COMPUTED from the data.
+    # (I deliberately add no comments inside the triple-quoted string below,
+    # because anything inside it becomes part of the report text.)
     # Generate Markdown Report
     legit_cnt = (df['label'] == 0).sum()
     phish_cnt = (df['label'] == 1).sum()
-    
+
     report_content = f"""# ScamShield — Exploratory Data Analysis (EDA) Report
 
 ## Overview & Key Findings
